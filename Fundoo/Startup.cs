@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,8 +31,9 @@ namespace Fundoo
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton<IUserBL, UserBL>();
-            services.AddSingleton<IUserRL, UserRL>();
+            services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:UserDB"]));
+            services.AddScoped<IUserBL, UserBL>();
+            services.AddScoped<IUserRL, UserDataBaseRL>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

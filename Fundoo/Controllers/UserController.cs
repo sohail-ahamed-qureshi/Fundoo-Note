@@ -19,7 +19,7 @@ namespace Fundoo.Controllers
             this.userBL = userBL;
         }
 
-        [HttpPost] // create 
+        [HttpPost] 
         [Route("api/[controller]")]
         public ActionResult RegisterNewUser(User newUser)
         {
@@ -27,7 +27,7 @@ namespace Fundoo.Controllers
             return Created(newUser.UserId.ToString(), user);
         }
 
-        [HttpGet] // read
+        [HttpGet] 
         [Route("api/[controller]")]
         public ActionResult GetAllUsers()
         {
@@ -35,7 +35,7 @@ namespace Fundoo.Controllers
             return Ok(users);
         }
 
-        [HttpGet] //read
+        [HttpGet] 
         [Route("api/[controller]/{userId}")]
         public ActionResult GetUser(int userid)
         {
@@ -45,7 +45,7 @@ namespace Fundoo.Controllers
             return NotFound($"UserID: {userid} Not Found!!");
         }
 
-        [HttpPost] // create 
+        [HttpPost] 
         [Route("api/[controller]/login")]
         public ActionResult Login(Login login)
         {
@@ -57,7 +57,7 @@ namespace Fundoo.Controllers
             return NotFound("Invalid UserName or Password");
         }
 
-        [HttpPut] //update
+        [HttpPut] 
         [Route("api/[controller]/Update/{userId}")]
         public ActionResult UpdateUserDetails(User user)
         {
@@ -69,7 +69,7 @@ namespace Fundoo.Controllers
             return NotFound($"Invalid UserID: {user.UserId}");
         }
 
-        [HttpDelete] //delete
+        [HttpDelete] 
         [Route("api/[controller]/Delete/{userId}")]
         public ActionResult DeleteUser(int userId)
         {
@@ -79,7 +79,7 @@ namespace Fundoo.Controllers
             return NotFound($"Invalid userId: {userId}, User Not Found");
         }
 
-        [HttpPost] //create
+        [HttpPost] 
         [Route("api/[controller]/forgotpassword")]
         public ActionResult Forgotpassword(User user)
         {
@@ -89,7 +89,7 @@ namespace Fundoo.Controllers
             return NotFound("Invalid UserName");
         }
 
-        [HttpPut] //update
+        [HttpPut] 
         [Route("api/[controller]/resetpassword/{userId}")]
         public ActionResult ResetPassword(int userId,User user)
         {
