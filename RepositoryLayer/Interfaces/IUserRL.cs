@@ -10,11 +10,12 @@ namespace RepositoryLayer.Interfaces
         User RegisterNewUser(User newUser);
         List<User> GetUsers();
         User GetUser(int userid);
+        User GetUser(string email);
         User UpdateUser(User user);
-        void DeleteUser(User user);
+        bool DeleteUser(User user);
         User UserLogin(Login login);
-        string ForgotPassword(string userName);
-        User ResetPassword(User user, string password);
+        User ForgotPassword(string userName);
+        User ResetPassword(User existingUser, string password);
 
 
     }

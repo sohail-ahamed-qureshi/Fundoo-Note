@@ -15,7 +15,7 @@ namespace BusinessLayer.Interfaces
 
         User UserLogin(Login login);
         string ForgotPassword(string userName);
-        User ResetPassword(int userId, string password);
+        User ResetPassword(ResetPassword resetPassword);
 
     }
 }

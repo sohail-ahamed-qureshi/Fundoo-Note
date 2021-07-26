@@ -10,7 +10,7 @@ namespace RepositoryLayer.Services
     {
         public List<User> users = new List<User>()
         {
-            new User(){ UserId = 1, UserName ="sohail", age= 25, password = "12345", Occupation = "Engineer" }
+            new User(){ UserId = 1, FirstName ="sohail", LastName= "Ahamed", Password = "12345", ConfirmPassword = "12345" ,Email = "sohailqureshi82@gmail.com", CreatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")    }
         };
 
         public List<User> GetUsers()
@@ -21,49 +21,62 @@ namespace RepositoryLayer.Services
         public User RegisterNewUser(User newUser)
         {
             newUser.UserId = users.Count + 1;
+            newUser.CreatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+            newUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             users.Add(newUser);
             return newUser;
         }
 
+        //not required
         public User GetUser(int userid)
         {
             var user = users.Find(user => user.UserId == userid);
             return user;
         }
 
+        public User GetUser(string email)
+        {
+            var user = users.Find(user => user.Email == email);
+            return user;
+        }
+
         public User UpdateUser(User user)
         {
             User existingUser = GetUser(user.UserId);
-            existingUser.UserName = user.UserName;
-            existingUser.password = user.password;
-            existingUser.age = user.age;
-            existingUser.Occupation = user.Occupation;
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.Email = user.Email;
+            existingUser.Password = user.Password;
+            existingUser.ConfirmPassword = user.Password;
+            existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             return existingUser;
         }
 
-        public void DeleteUser(User user)
+        public bool DeleteUser(User user)
         {
-            users.Remove(user);
+            return users.Remove(user);
         }
 
         public User UserLogin(Login login)
         {
-            var user = users.Find(x => x.UserName == login.userName && x.password == login.password);
+            var user = users.Find(x => x.Email == login.Email && x.Password == login.Password);
             return user;
         }
 
-        public string ForgotPassword(string userName)
+        public User ForgotPassword(string email)
         {
-            User existingUser = users.Find(user => user.UserName == userName);
+            User existingUser = users.Find(user => user.Email == email);
             if (existingUser != null)
-                return existingUser.password;
+                return existingUser;
             return null;
         }
 
-        public User ResetPassword(User user, string password)
+        public User ResetPassword(User existingUser, string newPassword)
         {
-            user.password = password;
-            return user;
+            existingUser.Password = newPassword;
+            existingUser.ConfirmPassword = newPassword;
+            existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+            return existingUser;
         }
     }
 }

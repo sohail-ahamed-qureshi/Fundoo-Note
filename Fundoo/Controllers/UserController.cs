@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fundoo.Controllers
 {
-
+    [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -19,24 +19,25 @@ namespace Fundoo.Controllers
             this.userBL = userBL;
         }
 
-        [HttpPost] 
-        [Route("api/[controller]")]
+        [HttpPost]
+        [Route("Register")]
         public ActionResult RegisterNewUser(User newUser)
         {
             User user = userBL.UserRegister(newUser);
-            return Created(newUser.UserId.ToString(), user);
+            if(user != null)
+                return Created(newUser.Email, user);
+            return BadRequest("User Already Exists!!");
         }
 
-        [HttpGet] 
-        [Route("api/[controller]")]
+        [HttpGet]
         public ActionResult GetAllUsers()
         {
             var users = userBL.GetUsers();
             return Ok(users);
         }
 
-        [HttpGet] 
-        [Route("api/[controller]/{userId}")]
+        [HttpGet]
+        [Route("{userId}")]
         public ActionResult GetUser(int userid)
         {
             var user = userBL.GetUser(userid);
@@ -45,60 +46,58 @@ namespace Fundoo.Controllers
             return NotFound($"UserID: {userid} Not Found!!");
         }
 
-        [HttpPost] 
-        [Route("api/[controller]/login")]
+        [HttpPost]
+        [Route("Login")]
         public ActionResult Login(Login login)
         {
             var user = userBL.UserLogin(login);
             if (user != null)
-            {
-                return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.UserName}" });
-            }
+                return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}" });
             return NotFound("Invalid UserName or Password");
         }
 
-        [HttpPut] 
-        [Route("api/[controller]/Update/{userId}")]
+        [HttpPut]
+        [Route("Update")]
         public ActionResult UpdateUserDetails(User user)
         {
-            var updatedUser = userBL.UpdateUser(user);
+            User updatedUser = null;
+            if (user != null)
+                updatedUser = userBL.UpdateUser(user);
             if (updatedUser != null)
-            {
-                return Created(updatedUser.UserId.ToString(), updatedUser);
-            }
-            return NotFound($"Invalid UserID: {user.UserId}");
+                return Created(updatedUser.Email, updatedUser);
+            return NotFound($"Invalid User Details");
         }
 
-        [HttpDelete] 
-        [Route("api/[controller]/Delete/{userId}")]
+        [HttpDelete]
+        [Route("{userId}")]
         public ActionResult DeleteUser(int userId)
         {
             bool result = userBL.DeleteUser(userId);
-            if(result)
-                return Ok(new { Success = true, Message = $"User id: {userId} Delete SuccessFull " });
-            return NotFound($"Invalid userId: {userId}, User Not Found");
+            if (result)
+                return Ok(new { Success = true, Message = $"User Id: {userId} Delete SuccessFull " });
+            return NotFound($"Invalid Id: {userId}, User Not Found");
         }
 
-        [HttpPost] 
-        [Route("api/[controller]/forgotpassword")]
+        [HttpPost]
+        [Route("forgotpassword")]
         public ActionResult Forgotpassword(User user)
         {
-           string password = userBL.ForgotPassword(user.UserName);
-            if(password != null) 
-                return Ok(new { Success = true, Message =  $"User Name: {user.UserName}, Password = {password}"  });
-            return NotFound("Invalid UserName");
+            string password = userBL.ForgotPassword(user.Email);
+            if (password != null)
+                return Ok(new { Success = true, Message = $"Email: {user.Email}, Password = {password}" });
+            return NotFound("Invalid Email");
         }
 
-        [HttpPut] 
-        [Route("api/[controller]/resetpassword/{userId}")]
-        public ActionResult ResetPassword(int userId,User user)
+        [HttpPut]
+        [Route("resetpassword")]
+        public ActionResult ResetPassword(ResetPassword reset)
         {
-            User upadatedUser = userBL.ResetPassword(userId, user.password);
+            User upadatedUser = userBL.ResetPassword(reset);
             if (upadatedUser != null)
             {
-                return Ok(new { Success = true, Message = $"Reset Password Successfully", Data = upadatedUser });
+                return Ok(new { Success = true, Message = $"Reset Password Successfully at {upadatedUser.UpdatedDateTime}", Data = upadatedUser });
             }
-            return NotFound($"Invalid UserId: {userId}");
+            return NotFound($"Invalid User Details");
         }
     }
 }

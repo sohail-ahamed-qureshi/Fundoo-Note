@@ -13,6 +13,6 @@ namespace RepositoryLayer.Services
 
         }
 
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> FundooUsers { get; set; }
     }
 }

@@ -34,6 +34,10 @@ namespace Fundoo
             services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:UserDB"]));
             services.AddScoped<IUserBL, UserBL>();
             services.AddScoped<IUserRL, UserDataBaseRL>();
+
+            //services.AddSingleton<IUserBL, UserBL>();
+            //services.AddSingleton<IUserRL, UserRL>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

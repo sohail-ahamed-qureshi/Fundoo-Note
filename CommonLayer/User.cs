@@ -12,15 +12,26 @@ namespace Fundoo.CommonLayer
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
-        public string UserName { get; set; }
-        public string password { get; set; }
-        public int age { get; set; }
-        public string Occupation { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string ConfirmPassword { get; set; }
+        public string CreatedDateTime { get; set; }
+        public string UpdatedDateTime { get; set; }
+
     }
 
     public class Login
     {
-        public string userName { get; set; }
-        public string password { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class ResetPassword
+    {
+        public string Email { get; set; }
+        public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
     }
 }

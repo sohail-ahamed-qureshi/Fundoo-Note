@@ -6,66 +6,82 @@ using System.Linq;
 using System.Text;
 
 namespace RepositoryLayer.Services
-{
-
-    public class UserDataBaseRL : IUserRL
+{ 
+    public class UserDataBaseRL : IUserRL 
     {
+        
         private UserContext userContext;
         public UserDataBaseRL(UserContext userContext)
         {
             this.userContext = userContext;
         }
-        public void DeleteUser(User user)
+        public bool DeleteUser(User user)
         {
-            userContext.Users.Remove(user);
-            userContext.SaveChanges();
+            userContext.FundooUsers.Remove(user);
+            int rowsAffected = userContext.SaveChanges();
+            bool result = rowsAffected == 1 ? true : false;
+            return result;
         }
 
-        public string ForgotPassword(string userName)
+        public User ForgotPassword(string email)
         {
-            var user = userContext.Users.FirstOrDefault(user=> user.UserName == userName);
-            return user.password;
+            var user = GetUser(email);
+            if (user == null)
+                return null;
+            return user;
         }
 
         public User GetUser(int userid)
         {
-            var user = userContext.Users.Find(userid);
+            var user = userContext.FundooUsers.Find(userid);
+            return user;
+        }
+
+        public User GetUser(string email)
+        {
+            var user = userContext.FundooUsers.FirstOrDefault(user => user.Email == email);
             return user;
         }
 
         public List<User> GetUsers()
         {
-            return userContext.Users.ToList();
+            return userContext.FundooUsers.ToList();
         }
 
         public User RegisterNewUser(User newUser)
         {
-            userContext.Users.Add(newUser);
-            userContext.SaveChanges();
-            return newUser;
+            var existingUser = GetUser(newUser.Email);
+            if(existingUser == null){
+                newUser.CreatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                newUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                userContext.FundooUsers.Add(newUser);
+            }
+            int rowsAffected = userContext.SaveChanges();
+            return rowsAffected == 1 ? newUser : null;
         }
 
-        public User ResetPassword(User user, string password)
+        public User ResetPassword(User existingUser, string newPassword)
         {
-            user.password = password;
+            existingUser.Password = newPassword;
+            existingUser.ConfirmPassword = newPassword;
+            existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             userContext.SaveChanges();
-            return user;
+            return existingUser;
         }
 
         public User UpdateUser(User user)
         {
-            var existingUser = GetUser(user.UserId);
-            existingUser.UserName = user.UserName;
-            existingUser.password = user.password;
-            existingUser.age = user.age;
-            existingUser.Occupation = user.Occupation;
+            var existingUser = GetUser(user.Email);
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             userContext.SaveChanges();
             return existingUser;
         }
 
         public User UserLogin(Login login)
         {
-            var user = userContext.Users.FirstOrDefault(user => user.UserName == login.userName && user.password == login.password);
+            var user = userContext.FundooUsers.FirstOrDefault(user => user.Email == login.Email);
             return user;
         }
     }
