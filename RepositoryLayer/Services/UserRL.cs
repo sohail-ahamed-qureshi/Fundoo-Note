@@ -78,5 +78,10 @@ namespace RepositoryLayer.Services
             existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             return existingUser;
         }
+
+        public string Authenticate(Login login)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

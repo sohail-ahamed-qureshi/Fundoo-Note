@@ -1,19 +1,28 @@
-﻿using Fundoo.CommonLayer;
+﻿using CommonLayer;
+using Fundoo.CommonLayer;
+using Microsoft.IdentityModel.Tokens;
 using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 
 namespace RepositoryLayer.Services
-{ 
-    public class UserDataBaseRL : IUserRL 
+{
+    public class UserDataBaseRL : IUserRL
     {
-        
+        private AuthenticationSettings authenticationSettings;
         private UserContext userContext;
         public UserDataBaseRL(UserContext userContext)
         {
             this.userContext = userContext;
+        }
+
+        public UserDataBaseRL(AuthenticationSettings authenticationSettings)
+        {
+            this.authenticationSettings = authenticationSettings;
         }
         /// <summary>
         /// ability to remove user details from the database
@@ -77,7 +86,8 @@ namespace RepositoryLayer.Services
         public User RegisterNewUser(User newUser)
         {
             var existingUser = GetUser(newUser.Email);
-            if(existingUser == null){
+            if (existingUser == null)
+            {
                 newUser.CreatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
                 newUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
                 newUser.ConfirmPassword = null;
@@ -86,7 +96,12 @@ namespace RepositoryLayer.Services
             int rowsAffected = userContext.SaveChanges();
             return rowsAffected == 1 ? newUser : null;
         }
-
+        /// <summary>
+        /// ability to reset password of existing user 
+        /// </summary>
+        /// <param name="existingUser"></param>
+        /// <param name="newPassword"></param>
+        /// <returns></returns>
         public User ResetPassword(User existingUser, string newPassword)
         {
             existingUser.Password = newPassword;
@@ -95,7 +110,11 @@ namespace RepositoryLayer.Services
             userContext.SaveChanges();
             return existingUser;
         }
-
+        /// <summary>
+        /// ability to update user details in the dsatabase
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public User UpdateUser(User user)
         {
             var existingUser = GetUser(user.Email);
@@ -107,11 +126,16 @@ namespace RepositoryLayer.Services
             userContext.SaveChanges();
             return existingUser;
         }
-
+        /// <summary>
+        /// ability to perform login operation 
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
         public User UserLogin(Login login)
         {
             var user = userContext.FundooUsers.FirstOrDefault(user => user.Email == login.Email);
             return user;
         }
+
     }
 }

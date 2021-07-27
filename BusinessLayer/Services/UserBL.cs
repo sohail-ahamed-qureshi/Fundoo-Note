@@ -13,8 +13,6 @@ namespace BusinessLayer.Services
 {
     public class UserBL : IUserBL
     {
-        string secretKey = "FundooUser_BridgeLabz";
-        static string Jtoken;
         private IUserRL userRL;
         public UserBL(IUserRL userRL)
         {
@@ -170,72 +168,30 @@ namespace BusinessLayer.Services
             string password = new String(decodeChar);
             return password;
         }
-        /// <summary>
-        /// ability to generate token for the user with expiring time of one day
-        /// </summary>
-        /// <param name="userName"></param>
-        /// <returns></returns>
-        public string GenerateToken(string userName, string userEmail, int userId)
-        {
-            var issuer = "http://mysite.com";
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var permClaims = new List<Claim>();
-            permClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-            permClaims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
-            permClaims.Add(new Claim(ClaimTypes.Name, userName));
-            permClaims.Add(new Claim( ClaimTypes.Email, userEmail));
-            var token = new JwtSecurityToken(issuer,
-                    issuer,
-                    permClaims,
-                    expires: DateTime.Now.AddDays(1),
-                    signingCredentials: credentials);
-            Jtoken = new JwtSecurityTokenHandler().WriteToken(token);
-            return Jtoken;
-        }
 
-        public static ClaimsPrincipal GetPrincipal(string token)
+        public string Authenticate(string userEmail)
         {
-            try
+            string SecretKey = "FundooNotes BridgeLabz by Sohail Ahamed Q";
+            var user = GetUser(userEmail);
+            if (user != null)
             {
-                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-                JwtSecurityToken jwtToken = (JwtSecurityToken)tokenHandler.ReadToken(token);
-                if (jwtToken == null) return null;
-                byte[] key = Convert.FromBase64String(Jtoken);
-                TokenValidationParameters parameters = new TokenValidationParameters()
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(SecretKey);
+                var tokenDescpritor = new SecurityTokenDescriptor
                 {
-                    RequireExpirationTime = true,
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                    Subject = new ClaimsIdentity(new Claim[] {
+                        new Claim(ClaimTypes.Name, user.FirstName),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                    }),
+                    Expires = DateTime.UtcNow.AddMinutes(10),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
-                SecurityToken securityToken;
-                ClaimsPrincipal principal = tokenHandler.ValidateToken(token, parameters, out securityToken);
-                return principal;
+                var token = tokenHandler.CreateToken(tokenDescpritor);
+                string jwtToken = tokenHandler.WriteToken(token);
+                return jwtToken;
             }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public string ValidateToken(string token)
-        {
-            string email = null;
-            ClaimsPrincipal principal = GetPrincipal(token);
-            if (principal == null) return null;
-            ClaimsIdentity identity = null;
-            try
-            {
-                identity = (ClaimsIdentity)principal.Identity;
-            }
-            catch (NullReferenceException)
-            {
-                return null;
-            }
-            Claim userEmailClaim = identity.FindFirst(ClaimTypes.Email);
-            email = userEmailClaim.Value;
-            return email;
+            return null;
         }
     }
 }

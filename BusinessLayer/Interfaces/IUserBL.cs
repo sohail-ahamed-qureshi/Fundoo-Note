@@ -16,7 +16,9 @@ namespace BusinessLayer.Interfaces
         User UserLogin(Login login);
         string ForgotPassword(string userName);
         User ResetPassword(ResetPassword resetPassword);
-        string GenerateToken(string userName, string userEmail, int userId);
-        string ValidateToken(string token);
+
+        string Authenticate(string UserEmail);
+
+
     }
 }

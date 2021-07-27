@@ -16,7 +16,6 @@ namespace RepositoryLayer.Interfaces
         User UserLogin(Login login);
         User ForgotPassword(string userName);
         User ResetPassword(User existingUser, string password);
-
-
     }
+
 }

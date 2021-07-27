@@ -16,7 +16,6 @@ namespace Fundoo.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private static string token;
         private IUserBL userBL;
         public UserController(IUserBL userBL)
         {
@@ -57,9 +56,8 @@ namespace Fundoo.Controllers
             var user = userBL.UserLogin(login);
             if (user != null)
             {
-                token = userBL.GenerateToken(user.FirstName, user.Email, user.UserId);
+                string token = userBL.Authenticate(user.Email);
                 return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}", data = token });
-
             }
             return NotFound("Invalid UserName or Password");
         }
@@ -107,24 +105,5 @@ namespace Fundoo.Controllers
             }
             return NotFound($"Invalid User Details");
         }
-
-        [HttpGet]
-        [Route("Authentication")]
-        public ActionResult Validate(string token, int userId)
-        {
-            User user = userBL.GetUser(userId);
-            if(user == null)
-            {
-                return NotFound(new { Message = "User Invalid" });
-            }
-            string tokenUserEmail = userBL.ValidateToken(token);
-            if (user.Email.Equals(tokenUserEmail))
-            {
-                return Ok(new { Message = "Success" });
-            }
-            return BadRequest(new { Message = "Invalid Token" });
-        }
-
-      
     }
 }

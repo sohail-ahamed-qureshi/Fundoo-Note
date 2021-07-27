@@ -1,21 +1,18 @@
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
+using CommonLayer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace Fundoo
 {
@@ -32,11 +29,39 @@ namespace Fundoo
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            var authenticationSettings = Configuration.GetSection("Settings");
+            services.Configure<AuthenticationSettings>(authenticationSettings);
+
+            //JWT authentication
+            var authSettings = authenticationSettings.Get<AuthenticationSettings>();
+            var key = Encoding.ASCII.GetBytes(authSettings.SecretKey);
+            services.AddAuthentication(auth =>
+            {
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(jwt =>
+            {
+                jwt.RequireHttpsMetadata = false;
+                jwt.SaveToken = true;
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
             services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:UserDB"]));
             services.AddScoped<IUserBL, UserBL>();
             services.AddScoped<IUserRL, UserDataBaseRL>();
 
-            //services.AddSingleton<IUserBL, UserBL>();
+
+
+
+
+            //adservices.AddSingleton<IUserBL, UserBL>();
             //services.AddSingleton<IUserRL, UserRL>();
 
             // Register the swagger generator, This service is responsible for genrating Swagger Documents.
