@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Fundoo.CommonLayer
 {
+    /// <summary>
+    /// model class for user registration.
+    /// </summary>
     public class User
     {
         [Key]
@@ -21,13 +24,17 @@ namespace Fundoo.CommonLayer
         public string UpdatedDateTime { get; set; }
 
     }
-
+    /// <summary>
+    /// model class for login
+    /// </summary>
     public class Login
     {
         public string Email { get; set; }
         public string Password { get; set; }
     }
-
+    /// <summary>
+    /// model class to reset password
+    /// </summary>
     public class ResetPassword
     {
         public string Email { get; set; }

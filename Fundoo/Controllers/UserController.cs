@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens;
+using BusinessLayer.Services;
 
 namespace Fundoo.Controllers
 {
@@ -13,6 +16,7 @@ namespace Fundoo.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private static string token;
         private IUserBL userBL;
         public UserController(IUserBL userBL)
         {
@@ -24,7 +28,7 @@ namespace Fundoo.Controllers
         public ActionResult RegisterNewUser(User newUser)
         {
             User user = userBL.UserRegister(newUser);
-            if(user != null)
+            if (user != null)
                 return Created(newUser.Email, user);
             return BadRequest("User Already Exists!!");
         }
@@ -52,7 +56,11 @@ namespace Fundoo.Controllers
         {
             var user = userBL.UserLogin(login);
             if (user != null)
-                return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}" });
+            {
+                token = userBL.GenerateToken(user.FirstName, user.Email, user.UserId);
+                return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}", data = token });
+
+            }
             return NotFound("Invalid UserName or Password");
         }
 
@@ -99,5 +107,24 @@ namespace Fundoo.Controllers
             }
             return NotFound($"Invalid User Details");
         }
+
+        [HttpGet]
+        [Route("Authentication")]
+        public ActionResult Validate(string token, int userId)
+        {
+            User user = userBL.GetUser(userId);
+            if(user == null)
+            {
+                return NotFound(new { Message = "User Invalid" });
+            }
+            string tokenUserEmail = userBL.ValidateToken(token);
+            if (user.Email.Equals(tokenUserEmail))
+            {
+                return Ok(new { Message = "Success" });
+            }
+            return BadRequest(new { Message = "Invalid Token" });
+        }
+
+      
     }
 }
