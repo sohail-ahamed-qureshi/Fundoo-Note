@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens;
 using BusinessLayer.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Experimental.System.Messaging;
+using RepositoryLayer.Interfaces;
+using RepositoryLayer.Services;
 
 namespace Fundoo.Controllers
 {
@@ -20,6 +25,7 @@ namespace Fundoo.Controllers
         public UserController(IUserBL userBL)
         {
             this.userBL = userBL;
+           
         }
 
         [HttpPost]
@@ -56,7 +62,7 @@ namespace Fundoo.Controllers
             var user = userBL.UserLogin(login);
             if (user != null)
             {
-                string token = userBL.Authenticate(user.Email);
+                string token = userBL.Authenticate(user.Email, user.UserId);
                 return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}", data = token });
             }
             return NotFound("Invalid UserName or Password");
@@ -88,12 +94,21 @@ namespace Fundoo.Controllers
         [Route("forgotpassword")]
         public ActionResult Forgotpassword(User user)
         {
-            string password = userBL.ForgotPassword(user.Email);
-            if (password != null)
-                return Ok(new { Success = true, Message = $"Email: {user.Email}, Password = {password}" });
+            var existingUser = userBL.ForgotPassword(user.Email);
+            if (existingUser != null)
+            {
+                //send email to user for reset password
+                bool result = userBL.ResetEmail(existingUser);
+                if (result)
+                {
+                    return Ok(new { Success = true, Message = $"Password Reset Link has been sent to Registered Email: {existingUser.Email}" });
+                }
+            }
             return NotFound("Invalid Email");
         }
+        
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
         [Route("resetpassword")]
         public ActionResult ResetPassword(ResetPassword reset)

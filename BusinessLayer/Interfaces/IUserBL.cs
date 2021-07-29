@@ -14,10 +14,12 @@ namespace BusinessLayer.Interfaces
         bool DeleteUser(int id);
 
         User UserLogin(Login login);
-        string ForgotPassword(string userName);
+        User ForgotPassword(string userName);
         User ResetPassword(ResetPassword resetPassword);
 
-        string Authenticate(string UserEmail);
+        string Authenticate(string UserEmail, int userID);
+
+        bool ResetEmail(User user);
 
 
     }

@@ -52,23 +52,25 @@ namespace Fundoo
                     ValidateAudience = false
                 };
             });
-
+            //Database Connection string
             services.AddDbContext<UserContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:UserDB"]));
             services.AddScoped<IUserBL, UserBL>();
             services.AddScoped<IUserRL, UserDataBaseRL>();
-
-
-
-
-
-            //adservices.AddSingleton<IUserBL, UserBL>();
-            //services.AddSingleton<IUserRL, UserRL>();
+            services.AddScoped<IEmailSender, EmailSender>();
 
             // Register the swagger generator, This service is responsible for genrating Swagger Documents.
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fundoo API", Version = "v1" });
             });
+
+            //Email Configurations here
+            var emailConfigure = Configuration.GetSection("EmailSettings")
+                .Get<EmailConfiguration>();
+            services.AddSingleton(emailConfigure);
+
+           
+
 
         }
 

@@ -1,11 +1,14 @@
 ﻿using BusinessLayer.Interfaces;
+using Experimental.System.Messaging;
 using Fundoo.CommonLayer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Security.Claims;
 using System.Text;
 
@@ -14,9 +17,13 @@ namespace BusinessLayer.Services
     public class UserBL : IUserBL
     {
         private IUserRL userRL;
-        public UserBL(IUserRL userRL)
+        private readonly IEmailSender emailSender;
+        private string secretKey;
+        public UserBL(IUserRL userRL, IEmailSender emailSender, IConfiguration config)
         {
             this.userRL = userRL;
+            this.emailSender = emailSender;
+            secretKey = config.GetSection("Settings").GetSection("SecretKey").Value;
         }
 
         public List<User> GetUsers()
@@ -114,11 +121,11 @@ namespace BusinessLayer.Services
         /// </summary>
         /// <param name="email">email of user</param>
         /// <returns>password</returns>
-        public string ForgotPassword(string email)
+        public User ForgotPassword(string email)
         {
             var user = userRL.ForgotPassword(email);
             if (user != null)
-                return DecodePassword(user.Password);
+                return user;
             return null;
         }
         /// <summary>
@@ -169,29 +176,111 @@ namespace BusinessLayer.Services
             return password;
         }
 
-        public string Authenticate(string userEmail)
+        public string Authenticate(string userEmail, int userId)
         {
-            string SecretKey = "FundooNotes BridgeLabz by Sohail Ahamed Q";
-            var user = GetUser(userEmail);
-            if (user != null)
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(secretKey);
+            var tokenDescpritor = new SecurityTokenDescriptor
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(SecretKey);
-                var tokenDescpritor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new Claim[] {
-                        new Claim(ClaimTypes.Name, user.FirstName),
-                        new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                Subject = new ClaimsIdentity(new Claim[] {
+                        new Claim(ClaimTypes.Email, userEmail),
+                        new Claim("userId", userId.ToString(), ClaimValueTypes.Integer),
                     }),
-                    Expires = DateTime.UtcNow.AddMinutes(10),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-                var token = tokenHandler.CreateToken(tokenDescpritor);
-                string jwtToken = tokenHandler.WriteToken(token);
-                return jwtToken;
+                Expires = DateTime.UtcNow.AddMinutes(10),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescpritor);
+            string jwtToken = tokenHandler.WriteToken(token);
+            return jwtToken;
+        }
+
+        /// <summary>
+        /// On forgot pasword 
+        /// check for user validation 
+        /// generate a token
+        /// send that token to user and the api link to reset the password.
+        /// receiev forgot password and confirm pssword and 
+        /// validate the token and extract email id from it
+        /// reset the password of the user in database
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public bool ResetEmail(User user)
+        {
+           
+            string token = Authenticate(user.Email, user.UserId);
+
+            //sending an email with the token and link to reset password
+            var emailMessage = new Mail(new string[] { user.Email }, "Fundoo Note - Reset Password", $"https://localhost:44333/weatherforecast");
+            emailSender.SendEmail(emailMessage);
+
+            //create msmq to send email to user ;
+            SendMessage(token, emailMessage);
+            RecieveMessage();
+            
+            return false;
+        }
+
+
+        private void SendMessage(string message, object value)
+        {
+            MessageQueue messageQueue = null;
+            string description = message;
+            string path = @".\private$\ForgotPassword";
+
+            try
+            {
+                if (MessageQueue.Exists(path))
+                {
+                    messageQueue = new MessageQueue(path);
+                }
+                else
+                {
+                    MessageQueue.Create(path);
+                    messageQueue = new MessageQueue(path);
+                }
+                string result = message + value;
+                messageQueue.Send(result, description);
             }
-            return null;
+            catch
+            {
+                throw;
+            }
+        }
+
+        private string RecieveMessage()
+        {
+            MessageQueue myQueue = null;
+            string result = null;
+            string path = @".\private$\ForgotPassword";
+
+            try
+            {
+                myQueue = new MessageQueue(path);
+                Message[] messages = myQueue.GetAllMessages();
+                if (messages.Length > 0)
+                {
+                    foreach (Message msg in messages)
+                    {
+                        msg.Formatter = new XmlMessageFormatter(new string[] { "System.String, mscorlib" });
+                        result = msg.Body.ToString();
+                        myQueue.Receive();
+                        File.WriteAllText(@"C:\Users\Admin\Desktop\BridgeLabs Assignments\#WebApplication\Fundoo-Note\Fundoo\RecieveMessages.txt", result);
+
+                    }
+                    myQueue.Refresh();
+                }
+                else
+                {
+                    Console.WriteLine("No Messages");
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return result;
         }
     }
 }
