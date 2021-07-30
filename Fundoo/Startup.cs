@@ -64,14 +64,10 @@ namespace Fundoo
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fundoo API", Version = "v1" });
             });
 
-            //Email Configurations here
+            //Email Configurations 
             var emailConfigure = Configuration.GetSection("EmailSettings")
                 .Get<EmailConfiguration>();
             services.AddSingleton(emailConfigure);
-
-           
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

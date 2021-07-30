@@ -17,6 +17,7 @@ namespace RepositoryLayer.Services
         public string Subject { get; set; }
         //content of email
         public string Content { get; set; }
+        //public string Token { get; set; }
 
         public Mail(IEnumerable<string> to, string subject, string content)
         {

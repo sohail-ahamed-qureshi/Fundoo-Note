@@ -68,7 +68,11 @@ namespace RepositoryLayer.Services
             emailMessage.Subject = mail.Subject;
             // .Text - content in text format, .Html - content to be sent in html format 
             emailMessage.Body = new TextPart(TextFormat.Html)
-            { Text = string.Format($"<a href='{mail.Content}' style ='color:red'>Reset Password</a>") };
+            { Text = string.Format($"<div style='text-align: center'>" +
+            $"<h3 style='text-align:center'>Fundoo Notes</h3>"+
+            $"<p>Click the below link to reset password</p>"+
+            $"<a href='{mail.Content}' style ='color:red'>Reset Password</a>" +
+            $"</div>") };
 
             return emailMessage;
         }

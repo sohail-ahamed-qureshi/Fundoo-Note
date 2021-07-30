@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 
 namespace BusinessLayer.Services
@@ -133,17 +135,13 @@ namespace BusinessLayer.Services
         /// </summary>
         /// <param name="resetPassword"></param>
         /// <returns></returns>
-        public User ResetPassword(ResetPassword resetPassword)
+        public User ResetPassword(User existingUser, ResetPassword resetPassword)
         {
-            if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword) && resetPassword.Email != null)
+            if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword))
             {
-                var existingUser = userRL.GetUser(resetPassword.Email);
-                if (existingUser != null)
-                {
-                    resetPassword.NewPassword = EncodePassword(resetPassword.NewPassword);
-                    User updateUser = userRL.ResetPassword(existingUser, resetPassword.NewPassword);
-                    return updateUser;
-                }
+                resetPassword.NewPassword = EncodePassword(resetPassword.NewPassword);
+                User user = userRL.ResetPassword(existingUser, resetPassword.NewPassword);
+                return user;
             }
             return null;
         }
@@ -207,18 +205,18 @@ namespace BusinessLayer.Services
         /// <returns></returns>
         public bool ResetEmail(User user)
         {
-           
+
             string token = Authenticate(user.Email, user.UserId);
 
             //sending an email with the token and link to reset password
-            var emailMessage = new Mail(new string[] { user.Email }, "Fundoo Note - Reset Password", $"https://localhost:44333/weatherforecast");
+            var emailMessage = new Mail(new string[] { user.Email }, "Fundoo Note - Reset Password", $"https://localhost:44333/api/user/resetpassword/{token} ");
             emailSender.SendEmail(emailMessage);
 
             //create msmq to send email to user ;
             SendMessage(token, emailMessage);
             RecieveMessage();
-            
-            return false;
+
+            return true;
         }
 
 
@@ -281,6 +279,38 @@ namespace BusinessLayer.Services
                 Console.WriteLine(ex.Message);
             }
             return result;
+        }
+
+        public User ExtractData(string token)
+        {
+            var key = Encoding.ASCII.GetBytes(secretKey);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            TokenValidationParameters parameters = new TokenValidationParameters
+            {
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false
+
+            };
+            SecurityToken securityToken;
+            ClaimsPrincipal principal;
+            try
+            {
+                principal = tokenHandler.ValidateToken(token, parameters, out securityToken);
+                var userId = Convert.ToInt32(principal.Claims.SingleOrDefault(c => c.Type == "userId").Value);
+                if(userId != 0)
+                {
+                    User existingUser = GetUser(userId);
+                    return existingUser;
+                }
+            }
+            catch
+            {
+                principal = null;
+            }
+            return null;
         }
     }
 }

@@ -15,11 +15,13 @@ namespace BusinessLayer.Interfaces
 
         User UserLogin(Login login);
         User ForgotPassword(string userName);
-        User ResetPassword(ResetPassword resetPassword);
+        User ResetPassword(User existingUser, ResetPassword resetPassword);
 
         string Authenticate(string UserEmail, int userID);
 
         bool ResetEmail(User user);
+
+        User ExtractData(string token);
 
 
     }

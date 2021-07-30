@@ -25,7 +25,7 @@ namespace Fundoo.Controllers
         public UserController(IUserBL userBL)
         {
             this.userBL = userBL;
-           
+
         }
 
         [HttpPost]
@@ -106,17 +106,22 @@ namespace Fundoo.Controllers
             }
             return NotFound("Invalid Email");
         }
-        
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
-        [Route("resetpassword")]
-        public ActionResult ResetPassword(ResetPassword reset)
+        [Route("resetpassword/{token}")]
+        public ActionResult ResetPassword( string token, [FromBody]ResetPassword reset)
         {
-            User upadatedUser = userBL.ResetPassword(reset);
-            if (upadatedUser != null)
+            if (reset != null && token != null)
             {
-                return Ok(new { Success = true, Message = $"Reset Password Successfully at {upadatedUser.UpdatedDateTime}", Data = upadatedUser });
+                User existingUser = userBL.ExtractData(token);
+                if (existingUser.UserId != 0)
+                {
+                    User updatedUser = userBL.ResetPassword(existingUser, reset);
+                    if (updatedUser.UserId != 0 )
+                    {
+                        return Ok(new { Success = true, Message = $"Reset Password Successfully at {updatedUser.UpdatedDateTime}", Data = updatedUser });
+                    }
+                }
             }
             return NotFound($"Invalid User Details");
         }

@@ -33,8 +33,7 @@ namespace RepositoryLayer.Services
         {
             userContext.FundooUsers.Remove(user);
             int rowsAffected = userContext.SaveChanges();
-            bool result = rowsAffected == 1 ? true : false;
-            return result;
+            return rowsAffected == 1;
         }
         /// <summary>
         /// ability to retrieve password from the database 
@@ -107,8 +106,8 @@ namespace RepositoryLayer.Services
             existingUser.Password = newPassword;
             existingUser.ConfirmPassword = null;
             existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-            userContext.SaveChanges();
-            return existingUser;
+            int row = userContext.SaveChanges();
+            return row == 1 ? existingUser : null;
         }
         /// <summary>
         /// ability to update user details in the dsatabase
@@ -123,8 +122,8 @@ namespace RepositoryLayer.Services
             existingUser.Password = user.Password;
             existingUser.ConfirmPassword = null;
             existingUser.UpdatedDateTime = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-            userContext.SaveChanges();
-            return existingUser;
+            int row = userContext.SaveChanges();
+            return row == 1 ? existingUser : null;
         }
         /// <summary>
         /// ability to perform login operation 
