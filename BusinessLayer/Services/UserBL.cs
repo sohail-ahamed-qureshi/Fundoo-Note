@@ -21,6 +21,7 @@ namespace BusinessLayer.Services
         private IUserRL userRL;
         private readonly IEmailSender emailSender;
         private string secretKey;
+        MessageQueue messageQueue = null;
         public UserBL(IUserRL userRL, IEmailSender emailSender, IConfiguration config)
         {
             this.userRL = userRL;
@@ -135,10 +136,11 @@ namespace BusinessLayer.Services
         /// </summary>
         /// <param name="resetPassword"></param>
         /// <returns></returns>
-        public User ResetPassword(User existingUser, ResetPassword resetPassword)
+        public User ResetPassword(int userId, ResetPassword resetPassword)
         {
             if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword))
             {
+                User existingUser = userRL.GetUser(userId);
                 resetPassword.NewPassword = EncodePassword(resetPassword.NewPassword);
                 User user = userRL.ResetPassword(existingUser, resetPassword.NewPassword);
                 return user;
@@ -203,29 +205,18 @@ namespace BusinessLayer.Services
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public bool ResetEmail(User user)
+        public string ResetEmail(User user)
         {
-
             string token = Authenticate(user.Email, user.UserId);
-
-            //sending an email with the token and link to reset password
-            var emailMessage = new Mail(new string[] { user.Email }, "Fundoo Note - Reset Password", $"https://localhost:44333/api/user/resetpassword/{token} ");
-            emailSender.SendEmail(emailMessage);
-
-            //create msmq to send email to user ;
-            SendMessage(token, emailMessage);
-            RecieveMessage();
-
-            return true;
+            if (token == null)
+                return null;
+            return token;
         }
 
-
-        private void SendMessage(string message, object value)
+        public void SendMessageQueue(User user)
         {
-            MessageQueue messageQueue = null;
-            string description = message;
+            string token = ResetEmail(user);
             string path = @".\private$\ForgotPassword";
-
             try
             {
                 if (MessageQueue.Exists(path))
@@ -237,8 +228,15 @@ namespace BusinessLayer.Services
                     MessageQueue.Create(path);
                     messageQueue = new MessageQueue(path);
                 }
-                string result = message + value;
-                messageQueue.Send(result, description);
+                Message message1 = new Message();
+                message1.Formatter = new BinaryMessageFormatter();
+                messageQueue.ReceiveCompleted += Msmq_RecieveCompleted;
+                messageQueue.Label = "url link";
+                message1.Body = token;
+                messageQueue.Send(message1);
+                messageQueue.BeginReceive();
+                messageQueue.Close();
+                //return true;
             }
             catch
             {
@@ -246,65 +244,101 @@ namespace BusinessLayer.Services
             }
         }
 
-        private string RecieveMessage()
+        private void Msmq_RecieveCompleted(object sender, ReceiveCompletedEventArgs e)
         {
-            MessageQueue myQueue = null;
-            string result = null;
-            string path = @".\private$\ForgotPassword";
-
-            try
-            {
-                myQueue = new MessageQueue(path);
-                Message[] messages = myQueue.GetAllMessages();
-                if (messages.Length > 0)
-                {
-                    foreach (Message msg in messages)
-                    {
-                        msg.Formatter = new XmlMessageFormatter(new string[] { "System.String, mscorlib" });
-                        result = msg.Body.ToString();
-                        myQueue.Receive();
-                        File.WriteAllText(@"C:\Users\Admin\Desktop\BridgeLabs Assignments\#WebApplication\Fundoo-Note\Fundoo\RecieveMessages.txt", result);
-
-                    }
-                    myQueue.Refresh();
-                }
-                else
-                {
-                    Console.WriteLine("No Messages");
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return result;
+            var message = messageQueue.EndReceive(e.AsyncResult);
+            message.Formatter = new BinaryMessageFormatter();
+            string token = message.Body.ToString();
+            string userEmail = ExtractData(token);
+            var emailMessage = new Mail(new string[] { userEmail }, "Fundoo Note - Reset Password", $"https://localhost:44333/api/user/resetpassword/{token} ");
+            emailSender.SendEmail(emailMessage);
         }
 
-        public User ExtractData(string token)
+
+        //private void SendMessage(Mail emailMessage, object value)
+        //{
+        //    string path = @".\private$\ForgotPassword";
+        //    try
+        //    {
+        //        if (MessageQueue.Exists(path))
+        //        {
+        //            messageQueue = new MessageQueue(path);
+        //        }
+        //        else
+        //        {
+        //            MessageQueue.Create(path);
+        //            messageQueue = new MessageQueue(path);
+        //        }
+        //        Message message1 = new Message();
+        //        message1.Formatter = new BinaryMessageFormatter();
+        //        messageQueue.ReceiveCompleted += Msmq_RecieveCompleted;
+        //        messageQueue.Label = "url link";
+
+
+        //        messageQueue.Send(emailMessage);
+        //    }
+        //    catch
+        //    {
+        //        throw;
+        //    }
+        //}
+
+
+
+        //private Mail RecieveMessage()
+        //{
+        //    MessageQueue myQueue = null;
+        //    string result;
+        //    string path = @".\private$\ForgotPassword";
+
+        //    try
+        //    {
+        //        myQueue = new MessageQueue(path);
+        //        Message[] messages = myQueue.GetAllMessages();
+        //        if (messages.Length > 0)
+        //        {
+        //            foreach (Message msg in messages)
+        //            {
+        //                msg.Formatter = new XmlMessageFormatter(new string[] { "System.String, mscorlib" });
+        //                result = msg.Body.ToString();
+        //                myQueue.Receive();
+        //                //File.WriteAllText(@"C:\Users\Admin\Desktop\BridgeLabs Assignments\#WebApplication\Fundoo-Note\Fundoo\RecieveMessages.txt", result);
+        //                return (Mail)msg.Body;
+        //            }
+        //            myQueue.Refresh();
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("No Messages");
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //    }
+        //    return null;
+        //}
+
+        public string ExtractData(string token)
         {
             var key = Encoding.ASCII.GetBytes(secretKey);
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             TokenValidationParameters parameters = new TokenValidationParameters
             {
-
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = false,
                 ValidateAudience = false
-
             };
             SecurityToken securityToken;
             ClaimsPrincipal principal;
             try
             {
                 principal = tokenHandler.ValidateToken(token, parameters, out securityToken);
+                string userEmail = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
                 var userId = Convert.ToInt32(principal.Claims.SingleOrDefault(c => c.Type == "userId").Value);
-                if(userId != 0)
-                {
-                    User existingUser = GetUser(userId);
-                    return existingUser;
-                }
+                return userEmail;
             }
             catch
             {

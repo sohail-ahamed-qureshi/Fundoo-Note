@@ -1,4 +1,5 @@
 ﻿using Fundoo.CommonLayer;
+using RepositoryLayer.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,14 +16,12 @@ namespace BusinessLayer.Interfaces
 
         User UserLogin(Login login);
         User ForgotPassword(string userName);
-        User ResetPassword(User existingUser, ResetPassword resetPassword);
+        User ResetPassword(int userId, ResetPassword resetPassword);
 
         string Authenticate(string UserEmail, int userID);
 
-        bool ResetEmail(User user);
+        string ResetEmail(User user);
 
-        User ExtractData(string token);
-
-
+        void SendMessageQueue(User user);
     }
 }

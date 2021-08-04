@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Experimental.System.Messaging;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
+using System.Security.Claims;
 
 namespace Fundoo.Controllers
 {
@@ -25,7 +26,6 @@ namespace Fundoo.Controllers
         public UserController(IUserBL userBL)
         {
             this.userBL = userBL;
-
         }
 
         [HttpPost]
@@ -37,16 +37,12 @@ namespace Fundoo.Controllers
                 return Created(newUser.Email, user);
             return BadRequest("User Already Exists!!");
         }
-
-        [HttpGet]
         public ActionResult GetAllUsers()
         {
             var users = userBL.GetUsers();
             return Ok(users);
         }
 
-        [HttpGet]
-        [Route("{userId}")]
         public ActionResult GetUser(int userid)
         {
             var user = userBL.GetUser(userid);
@@ -68,8 +64,6 @@ namespace Fundoo.Controllers
             return NotFound("Invalid UserName or Password");
         }
 
-        [HttpPut]
-        [Route("Update")]
         public ActionResult UpdateUserDetails(User user)
         {
             User updatedUser = null;
@@ -98,26 +92,29 @@ namespace Fundoo.Controllers
             if (existingUser != null)
             {
                 //send email to user for reset password
-                bool result = userBL.ResetEmail(existingUser);
-                if (result)
-                {
+                 userBL.SendMessageQueue(existingUser);
+                Task.Delay(5000);
+                //if (result)
+                //{
                     return Ok(new { Success = true, Message = $"Password Reset Link has been sent to Registered Email: {existingUser.Email}" });
-                }
+                //}
             }
             return NotFound("Invalid Email");
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
         [Route("resetpassword/{token}")]
-        public ActionResult ResetPassword( string token, [FromBody]ResetPassword reset)
+        public ActionResult ResetPassword([FromRoute]string token, [FromBody] ResetPassword reset)
         {
             if (reset != null && token != null)
             {
-                User existingUser = userBL.ExtractData(token);
-                if (existingUser.UserId != 0)
+                //extracting userId from token
+                ClaimsPrincipal principal = HttpContext.User as ClaimsPrincipal;
+                int userId = Convert.ToInt32(principal.Claims.SingleOrDefault(c => c.Type == "userId").Value);
+                if (userId != 0)
                 {
-                    User updatedUser = userBL.ResetPassword(existingUser, reset);
-                    if (updatedUser.UserId != 0 )
+                    User updatedUser = userBL.ResetPassword(userId, reset);
+                    if (updatedUser.UserId != 0)
                     {
                         return Ok(new { Success = true, Message = $"Reset Password Successfully at {updatedUser.UpdatedDateTime}", Data = updatedUser });
                     }
