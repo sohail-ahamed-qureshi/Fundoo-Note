@@ -28,12 +28,19 @@ namespace BusinessLayer.Services
             this.emailSender = emailSender;
             secretKey = config.GetSection("Settings").GetSection("SecretKey").Value;
         }
-
+        /// <summary>
+        /// utility method to get all user details from database
+        /// </summary>
+        /// <returns></returns>
         public List<User> GetUsers()
         {
             return userRL.GetUsers();
         }
-
+        /// <summary>
+        /// ability to register new user to database, validating user details and passwords
+        /// </summary>
+        /// <param name="newUser"></param>
+        /// <returns></returns>
         public User UserRegister(User newUser)
         {
             if (newUser != null && newUser.Password.Equals(newUser.ConfirmPassword))
@@ -44,7 +51,11 @@ namespace BusinessLayer.Services
             }
             return null;
         }
-
+        /// <summary>
+        /// utility method to get user data using userID.
+        /// </summary>
+        /// <param name="userid"></param>
+        /// <returns></returns>
         public User GetUser(int userid)
         {
             if (userid > 0)
@@ -55,7 +66,11 @@ namespace BusinessLayer.Services
             }
             return null;
         }
-
+        /// <summary>
+        /// utility method to get user from database using email property.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public User GetUser(string email)
         {
             if (email != null || string.IsNullOrEmpty(email))
@@ -175,7 +190,12 @@ namespace BusinessLayer.Services
             string password = new String(decodeChar);
             return password;
         }
-
+        /// <summary>
+        /// ability to generate jwt token with 10mins of expiry time.
+        /// </summary>
+        /// <param name="userEmail">userEmail</param>
+        /// <param name="userId">user id</param>
+        /// <returns>jwt token in string format</returns>
         public string Authenticate(string userEmail, int userId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -212,7 +232,10 @@ namespace BusinessLayer.Services
                 return null;
             return token;
         }
-
+        /// <summary>
+        /// passing the message to queue
+        /// </summary>
+        /// <param name="user"></param>
         public void SendMessageQueue(User user)
         {
             string token = ResetEmail(user);
@@ -243,7 +266,11 @@ namespace BusinessLayer.Services
                 throw;
             }
         }
-
+        /// <summary>
+        /// msmq recieve event handler which sends email asynchronously
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Msmq_RecieveCompleted(object sender, ReceiveCompletedEventArgs e)
         {
             var message = messageQueue.EndReceive(e.AsyncResult);
@@ -254,72 +281,11 @@ namespace BusinessLayer.Services
             emailSender.SendEmail(emailMessage);
         }
 
-
-        //private void SendMessage(Mail emailMessage, object value)
-        //{
-        //    string path = @".\private$\ForgotPassword";
-        //    try
-        //    {
-        //        if (MessageQueue.Exists(path))
-        //        {
-        //            messageQueue = new MessageQueue(path);
-        //        }
-        //        else
-        //        {
-        //            MessageQueue.Create(path);
-        //            messageQueue = new MessageQueue(path);
-        //        }
-        //        Message message1 = new Message();
-        //        message1.Formatter = new BinaryMessageFormatter();
-        //        messageQueue.ReceiveCompleted += Msmq_RecieveCompleted;
-        //        messageQueue.Label = "url link";
-
-
-        //        messageQueue.Send(emailMessage);
-        //    }
-        //    catch
-        //    {
-        //        throw;
-        //    }
-        //}
-
-
-
-        //private Mail RecieveMessage()
-        //{
-        //    MessageQueue myQueue = null;
-        //    string result;
-        //    string path = @".\private$\ForgotPassword";
-
-        //    try
-        //    {
-        //        myQueue = new MessageQueue(path);
-        //        Message[] messages = myQueue.GetAllMessages();
-        //        if (messages.Length > 0)
-        //        {
-        //            foreach (Message msg in messages)
-        //            {
-        //                msg.Formatter = new XmlMessageFormatter(new string[] { "System.String, mscorlib" });
-        //                result = msg.Body.ToString();
-        //                myQueue.Receive();
-        //                //File.WriteAllText(@"C:\Users\Admin\Desktop\BridgeLabs Assignments\#WebApplication\Fundoo-Note\Fundoo\RecieveMessages.txt", result);
-        //                return (Mail)msg.Body;
-        //            }
-        //            myQueue.Refresh();
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine("No Messages");
-        //        }
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex.Message);
-        //    }
-        //    return null;
-        //}
-
+        /// <summary>
+        /// ability to extract data from token.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns>returns user email</returns>
         public string ExtractData(string token)
         {
             var key = Encoding.ASCII.GetBytes(secretKey);

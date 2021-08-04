@@ -77,7 +77,8 @@ namespace RepositoryLayer.Services
             return userContext.FundooUsers.ToList();
         }
         /// <summary>
-        /// register a new user
+        /// register a new user,
+        /// before adding user to database check for unique email
         /// add new user to database
         /// </summary>
         /// <param name="newUser"></param>

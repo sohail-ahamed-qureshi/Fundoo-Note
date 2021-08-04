@@ -34,7 +34,13 @@ namespace Fundoo.Controllers
         {
             User user = userBL.UserRegister(newUser);
             if (user != null)
-                return Created(newUser.Email, user);
+            {
+                UserResponse userResponse = new UserResponse();
+                userResponse.FirstName = newUser.FirstName;
+                userResponse.LastName = newUser.LastName;
+                userResponse.Email = newUser.Email;
+                return Created(userResponse.Email, userResponse);
+            }
             return BadRequest("User Already Exists!!");
         }
         public ActionResult GetAllUsers()
@@ -92,19 +98,16 @@ namespace Fundoo.Controllers
             if (existingUser != null)
             {
                 //send email to user for reset password
-                 userBL.SendMessageQueue(existingUser);
+                userBL.SendMessageQueue(existingUser);
                 Task.Delay(5000);
-                //if (result)
-                //{
-                    return Ok(new { Success = true, Message = $"Password Reset Link has been sent to Registered Email: {existingUser.Email}" });
-                //}
+                return Ok(new { Success = true, Message = $"Password Reset Link has been sent to Registered Email: {existingUser.Email}" });
             }
             return NotFound("Invalid Email");
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
         [Route("resetpassword/{token}")]
-        public ActionResult ResetPassword([FromRoute]string token, [FromBody] ResetPassword reset)
+        public ActionResult ResetPassword([FromRoute] string token, [FromBody] ResetPassword reset)
         {
             if (reset != null && token != null)
             {
