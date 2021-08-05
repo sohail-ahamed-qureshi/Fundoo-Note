@@ -25,28 +25,61 @@ namespace Fundoo.Controllers
             this.notesBL = notesBL;
             this.userBL = userBL;
         }
+        /// <summary>
+        /// controller to add notes from body of s
+        /// </summary>
+        /// <param name="responseNotes"></param>
+        /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         [Route("AddNotes")]
         public ActionResult AddNote([FromBody] ResponseNotes responseNotes)
         {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail == null)
+                {
+                    return BadRequest(new { Message = "Invalid User Email" });
+                }
+                User existingUser = userBL.GetUser(userEmail);
+                if (responseNotes != null && existingUser != null)
+                {
+                    Note noteResult = notesBL.AddNotes(responseNotes, existingUser);
+                    if (noteResult != null)
+                    {
+                        return Created(noteResult.Email, noteResult);
+                    }
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            return BadRequest();
+        }
+        private string GetEmailFromToken()
+        {
             //getting user details from token
             ClaimsPrincipal principal = HttpContext.User as ClaimsPrincipal;
             string userEmail = principal.Claims.FirstOrDefault(user => user.Type == ClaimTypes.Email).Value;
-            if (userEmail == null)
+            return userEmail;
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("GetAllNotes")]
+        public ActionResult GetAllNotes()
+        {
+            try
             {
-                return BadRequest(new { Message = "Invalid User Email" });
+                string userEmail = GetEmailFromToken();
+                List<Note> allNotes = notesBL.GetAllNotes(userEmail);
+                return Ok(allNotes);
             }
-            User existingUser = userBL.GetUser(userEmail);
-            if (responseNotes != null && existingUser != null)
+            catch
             {
-                Note noteResult = notesBL.AddNotes(responseNotes, existingUser);
-                if (noteResult != null)
-                {
-                    return Created(noteResult.Email, noteResult);
-                }
+                throw;
             }
-            return BadRequest();
         }
     }
 }

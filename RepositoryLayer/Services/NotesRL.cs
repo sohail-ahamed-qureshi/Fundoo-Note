@@ -2,6 +2,7 @@
 using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace RepositoryLayer.Services
@@ -23,6 +24,12 @@ namespace RepositoryLayer.Services
             context.DbNotes.Add(newNote);
             int row = context.SaveChanges();
             return row == 1 ? newNote : null;
+        }
+
+        public List<Note> GetAllNotes(string email)
+        {
+            List<Note> allNotes = context.DbNotes.ToList().FindAll(note => note.Email == email);
+            return allNotes;
         }
     }
 }

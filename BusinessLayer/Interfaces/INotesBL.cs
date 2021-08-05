@@ -8,6 +8,7 @@ namespace BusinessLayer.Interfaces
 {
     public interface INotesBL
     {
-       Note AddNotes(ResponseNotes responseNotes, User user);
+        Note AddNotes(ResponseNotes responseNotes, User user);
+        List<Note> GetAllNotes(string userEmail);
     }
 }
