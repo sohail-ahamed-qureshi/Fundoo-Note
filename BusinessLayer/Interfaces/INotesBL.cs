@@ -9,6 +9,6 @@ namespace BusinessLayer.Interfaces
     public interface INotesBL
     {
         Note AddNotes(ResponseNotes responseNotes, User user);
-        List<Note> GetAllNotes(string userEmail);
+        List<ResponseNotes> GetAllNotes(string userEmail);
     }
 }

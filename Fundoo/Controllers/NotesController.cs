@@ -73,7 +73,7 @@ namespace Fundoo.Controllers
             try
             {
                 string userEmail = GetEmailFromToken();
-                List<Note> allNotes = notesBL.GetAllNotes(userEmail);
+                List<ResponseNotes> allNotes = notesBL.GetAllNotes(userEmail);
                 return Ok(allNotes);
             }
             catch

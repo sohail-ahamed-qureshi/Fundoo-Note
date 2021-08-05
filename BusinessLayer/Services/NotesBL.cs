@@ -40,9 +40,9 @@ namespace BusinessLayer.Services
 
         }
 
-        public List<Note> GetAllNotes(string userEmail)
+        public List<ResponseNotes> GetAllNotes(string userEmail)
         {
-            List<Note> allNotes = notesRL.GetAllNotes(userEmail);
+            List<ResponseNotes> allNotes = notesRL.GetAllNotes(userEmail);
             return allNotes;
         }
     }
