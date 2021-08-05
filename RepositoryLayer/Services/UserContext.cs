@@ -1,4 +1,5 @@
-﻿using Fundoo.CommonLayer;
+﻿using CommonLayer;
+using Fundoo.CommonLayer;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace RepositoryLayer.Services
         }
 
         public DbSet<User> FundooUsers { get; set; }
+        public DbSet<Note> DbNotes { get; set; }
     }
 }

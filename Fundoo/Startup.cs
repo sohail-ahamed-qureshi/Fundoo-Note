@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
+using System;
 using System.Text;
 
 namespace Fundoo
@@ -66,7 +67,7 @@ namespace Fundoo
 
             //Email Configurations 
             var emailConfigure = Configuration.GetSection("EmailSettings")
-                .Get<EmailConfiguration>();
+                    .Get<EmailConfiguration>();
             services.AddSingleton(emailConfigure);
         }
 
