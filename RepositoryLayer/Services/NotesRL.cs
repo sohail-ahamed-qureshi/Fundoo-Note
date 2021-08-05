@@ -25,14 +25,19 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1 ? newNote : null;
         }
-
-        public List<ResponseNotes> GetAllNotes(string email)
+        /// <summary>
+        /// ability to get all notes of the particular user
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public List<OutputNotes> GetAllNotes(string email)
         {
-            List<Note> allNotes = context.DbNotes.ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false );
-            ResponseNotes responseNotes = new ResponseNotes();
-            List<ResponseNotes> responseNotesList = new List<ResponseNotes>();
+            List<Note> allNotes = context.DbNotes.ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
+            OutputNotes responseNotes = new OutputNotes();
+            List<OutputNotes> responseNotesList = new List<OutputNotes>();
             foreach (Note item in allNotes)
             {
+                responseNotes.NoteId = item.NoteId;
                 responseNotes.Title = item.Title;
                 responseNotes.Description = item.Description;
                 responseNotes.isArchieve = item.isArchieve;
@@ -45,5 +50,38 @@ namespace RepositoryLayer.Services
             }
             return responseNotesList;
         }
+        /// <summary>
+        /// utility to retrieve note using note id
+        /// </summary>
+        /// <param name="noteId"></param>
+        /// <returns></returns>
+        public Note GetNoteById(int noteId)
+        {
+            Note note = context.DbNotes.FirstOrDefault(note => note.NoteId == noteId);
+            if (note != null)
+                return note;
+            return null;
+        }
+        /// <summary>
+        /// ability to delete the a note.
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool IsTrash(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if(existingNote!=null && existingNote.Email == userEmail)
+            {
+                existingNote.isTrash = true;
+                existingNote.isArchieve = false;
+                existingNote.isPin = false;
+                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
+
+
     }
 }

@@ -15,10 +15,15 @@ namespace BusinessLayer.Services
         {
             this.notesRL = notesRL;
         }
-
+        /// <summary>
+        /// update Notes model using response model with existing user
+        /// </summary>
+        /// <param name="responseNotes"></param>
+        /// <param name="existingUser"></param>
+        /// <returns></returns>
         public Note AddNotes(ResponseNotes responseNotes, User existingUser)
         {
-            if(responseNotes != null && existingUser != null)
+            if (responseNotes != null && existingUser != null)
             {
                 //setting up New Note
                 Note newNote = new Note();
@@ -32,18 +37,54 @@ namespace BusinessLayer.Services
                 newNote.Color = "white";
                 newNote.Image = "NA";
                 newNote.User = existingUser;
-                Note noteResult =  notesRL.AddNewNote(newNote);
-                return noteResult;
+                Note noteResult = notesRL.AddNewNote(newNote);
+                if (noteResult != null)
+                    return noteResult;
+                return null;
             }
             return null;
-            
-
         }
-
-        public List<ResponseNotes> GetAllNotes(string userEmail)
+        /// <summary>
+        /// validate user email and get all notes of particalar user
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public List<OutputNotes> GetAllNotes(string userEmail)
         {
-            List<ResponseNotes> allNotes = notesRL.GetAllNotes(userEmail);
-            return allNotes;
+            if (userEmail != null)
+            {
+                List<OutputNotes> allNotes = notesRL.GetAllNotes(userEmail);
+                return allNotes;
+            }
+            return null;
         }
+        /// <summary>
+        /// utility method to get note by noteid
+        /// </summary>
+        /// <param name="noteId"></param>
+        /// <returns></returns>
+        public Note GetNoteById(int noteId)
+        {
+            if (noteId > 0)
+            {
+                Note note = notesRL.GetNoteById(noteId);
+                if (note != null)
+                    return note;
+            }
+            return null;
+        }
+        /// <summary>
+        /// ability to validate notes id and user email before trashing a note.
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool IsTrash(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.IsTrash(notesId, userEmail);
+            return false;
+        }
+
     }
 }

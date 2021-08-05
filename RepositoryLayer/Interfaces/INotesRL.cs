@@ -8,6 +8,9 @@ namespace RepositoryLayer.Interfaces
     public interface INotesRL
     {
         Note AddNewNote(Note newNote);
-        List<ResponseNotes> GetAllNotes(string email);
+        List<OutputNotes> GetAllNotes(string email);
+        bool IsTrash(int notesId, string userEmail);
+
+        Note GetNoteById(int noteId);
     }
 }

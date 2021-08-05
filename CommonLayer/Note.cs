@@ -32,6 +32,7 @@ namespace CommonLayer
 
     public class ResponseNotes 
     {
+        public int NoteId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Reminder { get; set; }
@@ -41,4 +42,20 @@ namespace CommonLayer
         public string Color { get; set; }
         public string Image { get; set; }
     }
+
+    public class OutputNotes
+    {
+        public int NoteId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Reminder { get; set; }
+        public bool isArchieve { get; set; }
+        public bool isTrash { get; set; }
+        public bool isPin { get; set; }
+        public string Color { get; set; }
+        public string Image { get; set; }
+    }
+
+
+
 }

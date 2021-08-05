@@ -65,6 +65,10 @@ namespace Fundoo.Controllers
             string userEmail = principal.Claims.FirstOrDefault(user => user.Type == ClaimTypes.Email).Value;
             return userEmail;
         }
+        /// <summary>
+        /// Api to get all notes of user
+        /// </summary>
+        /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         [Route("GetAllNotes")]
@@ -73,7 +77,11 @@ namespace Fundoo.Controllers
             try
             {
                 string userEmail = GetEmailFromToken();
-                List<ResponseNotes> allNotes = notesBL.GetAllNotes(userEmail);
+                List<OutputNotes> allNotes = notesBL.GetAllNotes(userEmail);
+                if(allNotes.Count !> 0)
+                {
+                    return Ok(new { Success = true, Message = "You Dont have any active notes."});
+                }
                 return Ok(allNotes);
             }
             catch
@@ -81,5 +89,36 @@ namespace Fundoo.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// api to delete a note
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("trash/{notesId}")]
+        public ActionResult TrashANote([FromRoute]int notesId)
+        {
+            try
+            {   
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    bool isTrashed = notesBL.IsTrash(notesId, userEmail);
+                    if (isTrashed)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been Deleted!!"});
+                    }
+                }
+                return NotFound(new { Success = false, Message = "Note Not Found" });
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+
+
     }
 }
