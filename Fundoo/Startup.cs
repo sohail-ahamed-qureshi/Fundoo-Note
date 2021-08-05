@@ -58,11 +58,41 @@ namespace Fundoo
             services.AddScoped<IUserBL, UserBL>();
             services.AddScoped<IUserRL, UserDataBaseRL>();
             services.AddScoped<IEmailSender, EmailSender>();
+            services.AddScoped<INotesBL, NotesBL>();
+            services.AddScoped<INotesRL, NotesRL>();
 
             // Register the swagger generator, This service is responsible for genrating Swagger Documents.
-            services.AddSwaggerGen(c =>
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fundoo API", Version = "v1" });
+            //});
+
+            services.AddSwaggerGen(setup =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fundoo API", Version = "v1" });
+                // Include 'SecurityScheme' to use JWT Authentication
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Name = "JWT Authentication",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Description = "Put *ONLY* your JWT Bearer token on textbox below!",
+
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+
+                setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+                setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { jwtSecurityScheme, Array.Empty<string>() }
+                });
+
             });
 
             //Email Configurations 

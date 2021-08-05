@@ -29,4 +29,16 @@ namespace CommonLayer
         public string Image { get; set; }
         public User User { get; set; }
     }
+
+    public class ResponseNotes 
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Reminder { get; set; }
+        public bool isArchieve { get; set; }
+        public bool isTrash { get; set; }
+        public bool isPin { get; set; }
+        public string Color { get; set; }
+        public string Image { get; set; }
+    }
 }

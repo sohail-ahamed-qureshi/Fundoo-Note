@@ -11,6 +11,7 @@ namespace BusinessLayer.Interfaces
         User UserRegister(User newUser);
         List<User> GetUsers();
         User GetUser(int userid);
+        User GetUser(string email);
         User UpdateUser(User user);
         bool DeleteUser(int id);
 
