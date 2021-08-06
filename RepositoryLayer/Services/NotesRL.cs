@@ -204,6 +204,22 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1;
         }
+        /// <summary>
+        /// ability to unPin a note to top
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool UnPinNote(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == true)
+            {
+                existingNote.isPin = false;
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
 
 
     }

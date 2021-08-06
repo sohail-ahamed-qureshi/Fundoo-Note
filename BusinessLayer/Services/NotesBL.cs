@@ -175,6 +175,18 @@ namespace BusinessLayer.Services
                 return notesRL.PinNote(notesId, userEmail);
             return false;
         }
+        /// <summary>
+        /// validation for Unpin note
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool UnPinNote(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.UnPinNote(notesId, userEmail);
+            return false;
+        }
 
     }
 }
