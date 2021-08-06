@@ -152,5 +152,12 @@ namespace BusinessLayer.Services
             return null;
         }
 
+        public bool UnArchieveNote(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.UnArchieveNote(notesId, userEmail);
+            return false;
+        }
+
     }
 }

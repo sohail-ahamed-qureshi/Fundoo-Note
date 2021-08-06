@@ -225,7 +225,34 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
-
+        /// <summary>
+        /// api to unarchieve already archieved note of user
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("UnArchieveNote/{notesId}")]
+        public ActionResult UnArchieveANote([FromRoute] int notesId)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    bool isRestored = notesBL.UnArchieveNote(notesId, userEmail);
+                    if (isRestored)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been UnArchieved!!" });
+                    }
+                }
+                return NotFound(new { Success = false, Message = "Note Not Found" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
 
 
     }

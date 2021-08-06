@@ -166,6 +166,23 @@ namespace RepositoryLayer.Services
             }
             return trashedResponseNotes;
         }
+        /// <summary>
+        /// ability to unarchieve an active archeived notes
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool UnArchieveNote(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == true)
+            {
+                existingNote.isArchieve = false;
+                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
 
 
     }
