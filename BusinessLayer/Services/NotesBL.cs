@@ -130,6 +130,27 @@ namespace BusinessLayer.Services
                 return notesRL.ArchieveNote(notesId, userEmail);
             return false;
         }
+        /// <summary>
+        /// ability to validate userEmail before getting all the archieved notes
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public List<ResponseNotes> GetAllArchievedNotes(string userEmail)
+        {
+            try
+            {
+                if (userEmail != null)
+                {
+                    var archeievedNotes = notesRL.GetAllArchievedNotes(userEmail);
+                    return archeievedNotes;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            return null;
+        }
 
     }
 }

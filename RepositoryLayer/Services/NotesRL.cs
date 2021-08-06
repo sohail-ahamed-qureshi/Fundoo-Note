@@ -141,6 +141,31 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1;
         }
+        /// <summary>
+        /// ability to retreieve all active archieved notes of users and checking they are not trashed
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public List<ResponseNotes> GetAllArchievedNotes(string userEmail)
+        {
+            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note => note.Email == userEmail && note.isTrash == false && note.isArchieve == true);
+            List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
+            foreach (Note item in trashedNotes)
+            {
+                ResponseNotes responseNotes = new ResponseNotes();
+                responseNotes.NoteId = item.NoteId;
+                responseNotes.Title = item.Title;
+                responseNotes.Description = item.Description;
+                responseNotes.isArchieve = item.isArchieve;
+                responseNotes.isPin = item.isPin;
+                responseNotes.isTrash = item.isTrash;
+                responseNotes.Color = item.Color;
+                responseNotes.Image = item.Image;
+                responseNotes.Reminder = item.Reminder;
+                trashedResponseNotes.Add(responseNotes);
+            }
+            return trashedResponseNotes;
+        }
 
 
     }

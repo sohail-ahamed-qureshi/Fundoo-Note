@@ -190,7 +190,7 @@ namespace Fundoo.Controllers
                     bool isArchieve = notesBL.ArchieveNote(notesId, userEmail);
                     if (isArchieve)
                     {
-                        return Ok(new { Success = true, Message = "Note has been Restored!!" });
+                        return Ok(new { Success = true, Message = "Note has been Archieved!!" });
                     }
                 }
                 return NotFound(new { Success = false, Message = "Note Not Found" });
@@ -199,8 +199,34 @@ namespace Fundoo.Controllers
             {
                 return BadRequest(new { Success = false, ex.Message });
             }
-
         }
+        /// <summary>
+        /// api to view all notes present in archieve folder
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("ArchievedNotes")]
+        public ActionResult GetAllArchievedNotes()
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    var archievedNotes = notesBL.GetAllArchievedNotes(userEmail);
+                    if (archievedNotes.Count > 0)
+                        return Ok(archievedNotes);
+                }
+                return Ok(new { Message = "Your Archieve is Empty" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
+
 
     }
 }
