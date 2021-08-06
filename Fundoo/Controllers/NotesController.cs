@@ -32,7 +32,6 @@ namespace Fundoo.Controllers
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        [Route("AddNotes")]
         public ActionResult AddNote([FromBody] ResponseNotes responseNotes)
         {
             try
@@ -75,7 +74,6 @@ namespace Fundoo.Controllers
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
-        [Route("GetAllNotes")]
         public ActionResult GetAllNotes()
         {
             try
@@ -97,8 +95,8 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        [Route("trash/{notesId}")]
+        [HttpPut]
+        [Route("{notesId}/trash")]
         public ActionResult TrashANote([FromRoute] int notesId)
         {
             try
@@ -125,7 +123,7 @@ namespace Fundoo.Controllers
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
-        [Route("trashedNotes")]
+        [Route("trash")]
         public ActionResult GetAllTrashedNotes()
         {
             try
@@ -150,8 +148,8 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        [Route("restoreNote/{notesId}")]
+        [HttpPut]
+        [Route("{notesId}/Restore")]
         public ActionResult RestoreANote([FromRoute] int notesId)
         {
             try
@@ -178,8 +176,8 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        [Route("Archieve/{notesId}")]
+        [HttpPut]
+        [Route("{notesId}/Archive")]
         public ActionResult ArchieveNote([FromRoute] int notesId)
         {
             try
@@ -206,7 +204,7 @@ namespace Fundoo.Controllers
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
-        [Route("ArchievedNotes")]
+        [Route("Archive")]
         public ActionResult GetAllArchievedNotes()
         {
             try
@@ -231,8 +229,8 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        [Route("UnArchieveNote/{notesId}")]
+        [HttpPut]
+        [Route("{notesId}/UnArchive")]
         public ActionResult UnArchieveANote([FromRoute] int notesId)
         {
             try
@@ -259,8 +257,8 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        [Route("PinNote/{notesId}")]
+        [HttpPut]
+        [Route("{notesId}/Pin")]
         public ActionResult PinANote([FromRoute] int notesId)
         {
             try
@@ -287,8 +285,8 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        [Route("UnPinNote/{notesId}")]
+        [HttpPut]
+        [Route("{notesId}/UnPin")]
         public ActionResult UnPinANote([FromRoute] int notesId)
         {
             try
