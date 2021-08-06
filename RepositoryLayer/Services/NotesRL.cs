@@ -124,6 +124,23 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1;
         }
+        /// <summary>
+        /// ability to archieve a note which is not trashed 
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool ArchieveNote(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if(existingNote!= null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == false)
+            {
+                existingNote.isArchieve = true;
+                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
 
 
     }

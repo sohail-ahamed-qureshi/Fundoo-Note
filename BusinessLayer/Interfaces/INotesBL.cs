@@ -16,5 +16,6 @@ namespace BusinessLayer.Interfaces
         List<ResponseNotes> GetAllTrashedNotes(string userEmail);
 
         bool RestoreTrash(int notesId, string userEmail);
+        bool ArchieveNote(int notesId, string userEmail);
     }
 }

@@ -118,6 +118,18 @@ namespace BusinessLayer.Services
                 return notesRL.RestoreNote(notesId, userEmail);
             return false;
         }
+        /// <summary>
+        /// validating notes Id and userEmail before Archieving a note
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool ArchieveNote(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.ArchieveNote(notesId, userEmail);
+            return false;
+        }
 
     }
 }

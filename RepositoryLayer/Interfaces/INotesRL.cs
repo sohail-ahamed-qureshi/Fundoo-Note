@@ -14,5 +14,6 @@ namespace RepositoryLayer.Interfaces
         Note GetNoteById(int noteId);
         List<ResponseNotes> GetTrashedNotes(string userEmail);
         bool RestoreNote(int notesId, string userEmail);
+        bool ArchieveNote(int notesId, string userEmail);
     }
 }

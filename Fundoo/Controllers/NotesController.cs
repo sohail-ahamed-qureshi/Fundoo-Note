@@ -172,6 +172,35 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
+        /// <summary>
+        /// api to archieve a existing note of the user
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("Archieve/{notesId}")]
+        public ActionResult ArchieveNote([FromRoute] int notesId)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    bool isArchieve = notesBL.ArchieveNote(notesId, userEmail);
+                    if (isArchieve)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been Restored!!" });
+                    }
+                }
+                return NotFound(new { Success = false, Message = "Note Not Found" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+
+        }
 
     }
 }
