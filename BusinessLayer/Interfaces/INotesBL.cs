@@ -13,5 +13,6 @@ namespace BusinessLayer.Interfaces
         bool IsTrash(int notesId, string userEmail);
 
         Note GetNoteById(int noteId);
+        List<ResponseNotes> GetAllTrashedNotes(string userEmail);
     }
 }

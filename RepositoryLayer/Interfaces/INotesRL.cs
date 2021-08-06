@@ -12,5 +12,6 @@ namespace RepositoryLayer.Interfaces
         bool IsTrash(int notesId, string userEmail);
 
         Note GetNoteById(int noteId);
+        List<ResponseNotes> GetTrashedNotes(string userEmail);
     }
 }

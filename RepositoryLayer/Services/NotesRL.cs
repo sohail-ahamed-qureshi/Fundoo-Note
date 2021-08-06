@@ -33,10 +33,10 @@ namespace RepositoryLayer.Services
         public List<OutputNotes> GetAllNotes(string email)
         {
             List<Note> allNotes = context.DbNotes.ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
-            OutputNotes responseNotes = new OutputNotes();
             List<OutputNotes> responseNotesList = new List<OutputNotes>();
             foreach (Note item in allNotes)
             {
+                OutputNotes responseNotes = new OutputNotes();
                 responseNotes.NoteId = item.NoteId;
                 responseNotes.Title = item.Title;
                 responseNotes.Description = item.Description;
@@ -80,6 +80,31 @@ namespace RepositoryLayer.Services
             }
             int row = context.SaveChanges();
             return row == 1;
+        }
+        /// <summary>
+        /// ability to get all trashed notes of the user
+        /// </summary>
+        /// <param name="userEmail"> user email to validate</param>
+        /// <returns> list of trashed notes of the user</returns>
+        public List<ResponseNotes> GetTrashedNotes(string userEmail)
+        {
+            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note =>note.Email == userEmail && note.isTrash == true && note.isArchieve == false);
+            List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
+            foreach (Note item in trashedNotes)
+            {
+                ResponseNotes responseNotes = new ResponseNotes();
+                responseNotes.NoteId = item.NoteId;
+                responseNotes.Title = item.Title;
+                responseNotes.Description = item.Description;
+                responseNotes.isArchieve = item.isArchieve;
+                responseNotes.isPin = item.isPin;
+                responseNotes.isTrash = item.isTrash;
+                responseNotes.Color = item.Color;
+                responseNotes.Image = item.Image;
+                responseNotes.Reminder = item.Reminder;
+                trashedResponseNotes.Add(responseNotes);
+            }
+            return trashedResponseNotes;
         }
 
 

@@ -58,6 +58,10 @@ namespace Fundoo.Controllers
             }
             return BadRequest();
         }
+        /// <summary>
+        /// utiltity to extract userEmail from the token.
+        /// </summary>
+        /// <returns></returns>
         private string GetEmailFromToken()
         {
             //getting user details from token
@@ -78,15 +82,13 @@ namespace Fundoo.Controllers
             {
                 string userEmail = GetEmailFromToken();
                 List<OutputNotes> allNotes = notesBL.GetAllNotes(userEmail);
-                if(allNotes.Count !> 0)
-                {
-                    return Ok(new { Success = true, Message = "You Dont have any active notes."});
-                }
-                return Ok(allNotes);
+                if (allNotes.Count > 0)
+                    return Ok(allNotes);
+                return Ok(new { Message = "You dont have any Notes." });
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                return BadRequest(new { Success = false, Message = ex.Message });
             }
         }
         /// <summary>
@@ -97,28 +99,51 @@ namespace Fundoo.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         [Route("trash/{notesId}")]
-        public ActionResult TrashANote([FromRoute]int notesId)
+        public ActionResult TrashANote([FromRoute] int notesId)
         {
             try
-            {   
+            {
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
                     bool isTrashed = notesBL.IsTrash(notesId, userEmail);
                     if (isTrashed)
                     {
-                        return Ok(new { Success = true, Message = "Note has been Deleted!!"});
+                        return Ok(new { Success = true, Message = "Note has been Deleted!!" });
                     }
                 }
                 return NotFound(new { Success = false, Message = "Note Not Found" });
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                return BadRequest(new { Success = false, Message = ex.Message });
             }
         }
-
-
+        /// <summary>
+        /// api to view all the trashed notes present in trash folder.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("trashedNotes")]
+        public ActionResult GetAllTrashedNotes()
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    var trashedNotes = notesBL.GetAllTrashedNotes(userEmail);
+                    if (trashedNotes.Count > 0)
+                        return Ok(trashedNotes);
+                }
+                return Ok(new { Message = "Your trash is Empty" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+        }
 
     }
 }

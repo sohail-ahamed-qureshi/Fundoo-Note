@@ -85,6 +85,27 @@ namespace BusinessLayer.Services
                 return notesRL.IsTrash(notesId, userEmail);
             return false;
         }
+        /// <summary>
+        /// ability to validate userEmail before getting all the trashed notes
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public List<ResponseNotes> GetAllTrashedNotes(string userEmail)
+        {
+            try
+            {
+                if (userEmail != null)
+                {
+                    var trashedNotes = notesRL.GetTrashedNotes(userEmail);
+                    return trashedNotes;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            return null;
+        }
 
     }
 }
