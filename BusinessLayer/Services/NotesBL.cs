@@ -151,11 +151,28 @@ namespace BusinessLayer.Services
             }
             return null;
         }
-
+        /// <summary>
+        /// validation for unarchieve note
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         public bool UnArchieveNote(int notesId, string userEmail)
         {
             if (notesId > 0 && userEmail != null)
                 return notesRL.UnArchieveNote(notesId, userEmail);
+            return false;
+        }
+        /// <summary>
+        /// validation for pin note
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool PinNote(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.PinNote(notesId, userEmail);
             return false;
         }
 

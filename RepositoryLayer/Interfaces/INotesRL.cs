@@ -17,5 +17,6 @@ namespace RepositoryLayer.Interfaces
         bool ArchieveNote(int notesId, string userEmail);
         List<ResponseNotes> GetAllArchievedNotes(string userEmail);
         bool UnArchieveNote(int notesId, string userEmail);
+        bool PinNote(int notesId, string userEmail);
     }
 }

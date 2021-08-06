@@ -48,7 +48,12 @@ namespace RepositoryLayer.Services
                 responseNotes.Reminder = item.Reminder;
                 responseNotesList.Add(responseNotes);
             }
-            return responseNotesList;
+            //getting all pinned lists.
+            var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);
+            List<OutputNotes> finalResponseList = new List<OutputNotes>();
+            finalResponseList.AddRange(pinnedList);
+            finalResponseList = finalResponseList.Concat(responseNotesList.Where(notes => notes.isPin == false)).ToList();
+            return finalResponseList;
         }
         /// <summary>
         /// utility to retrieve note using note id
@@ -71,7 +76,7 @@ namespace RepositoryLayer.Services
         public bool IsTrash(int notesId, string userEmail)
         {
             Note existingNote = GetNoteById(notesId);
-            if(existingNote!=null && existingNote.Email == userEmail)
+            if (existingNote != null && existingNote.Email == userEmail)
             {
                 existingNote.isTrash = true;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
@@ -88,7 +93,7 @@ namespace RepositoryLayer.Services
         /// <returns> list of trashed notes of the user</returns>
         public List<ResponseNotes> GetTrashedNotes(string userEmail)
         {
-            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note =>note.Email == userEmail && note.isTrash == true);
+            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note => note.Email == userEmail && note.isTrash == true);
             List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
             foreach (Note item in trashedNotes)
             {
@@ -116,7 +121,7 @@ namespace RepositoryLayer.Services
         public bool RestoreNote(int notesId, string userEmail)
         {
             Note existingNote = GetNoteById(notesId);
-            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash ==  true)
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
             {
                 existingNote.isTrash = false;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
@@ -133,7 +138,7 @@ namespace RepositoryLayer.Services
         public bool ArchieveNote(int notesId, string userEmail)
         {
             Note existingNote = GetNoteById(notesId);
-            if(existingNote!= null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == false)
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == false)
             {
                 existingNote.isArchieve = true;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
@@ -179,6 +184,22 @@ namespace RepositoryLayer.Services
             {
                 existingNote.isArchieve = false;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
+        /// <summary>
+        /// ability to pin a note to top
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool PinNote(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == false)
+            {
+                existingNote.isPin = true;
             }
             int row = context.SaveChanges();
             return row == 1;
