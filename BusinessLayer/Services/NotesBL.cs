@@ -188,5 +188,12 @@ namespace BusinessLayer.Services
             return false;
         }
 
+        public bool DeleteNote(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.DeleteNote(notesId, userEmail);
+            return false;
+        }
+
     }
 }

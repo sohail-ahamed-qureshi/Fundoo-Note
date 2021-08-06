@@ -21,5 +21,6 @@ namespace BusinessLayer.Interfaces
         bool UnArchieveNote(int notesId, string userEmail);
         bool PinNote(int notesId, string userEmail);
         bool UnPinNote(int notesId, string userEmail);
+        bool DeleteNote(int notesId, string userEmail);
     }
 }

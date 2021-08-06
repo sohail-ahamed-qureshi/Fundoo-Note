@@ -308,6 +308,35 @@ namespace Fundoo.Controllers
             }
         }
 
+        /// <summary>
+        /// api to Delete a note.
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpDelete]
+        [Route("{notesId}")]
+        public ActionResult DeleteANote([FromRoute] int notesId)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    bool isDeleted = notesBL.DeleteNote(notesId, userEmail);
+                    if (isDeleted)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been Deleted!!" });
+                    }
+                }
+                return NotFound(new { Success = false, Message = "Note Not Found" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
 
     }
 }

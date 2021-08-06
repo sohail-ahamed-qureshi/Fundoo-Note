@@ -220,7 +220,22 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1;
         }
-
+        /// <summary>
+        /// ability to hard Delete a note from table
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool DeleteNote(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
+            {
+                context.DbNotes.Remove(existingNote);
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
 
     }
 }
