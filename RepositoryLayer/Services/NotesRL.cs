@@ -74,8 +74,6 @@ namespace RepositoryLayer.Services
             if(existingNote!=null && existingNote.Email == userEmail)
             {
                 existingNote.isTrash = true;
-                existingNote.isArchieve = false;
-                existingNote.isPin = false;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
             }
             int row = context.SaveChanges();
@@ -83,12 +81,14 @@ namespace RepositoryLayer.Services
         }
         /// <summary>
         /// ability to get all trashed notes of the user
+        /// check for isTrash is true 
+        /// irrespective of whether it is archieved or pinned
         /// </summary>
         /// <param name="userEmail"> user email to validate</param>
         /// <returns> list of trashed notes of the user</returns>
         public List<ResponseNotes> GetTrashedNotes(string userEmail)
         {
-            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note =>note.Email == userEmail && note.isTrash == true && note.isArchieve == false);
+            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note =>note.Email == userEmail && note.isTrash == true);
             List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
             foreach (Note item in trashedNotes)
             {
@@ -105,6 +105,24 @@ namespace RepositoryLayer.Services
                 trashedResponseNotes.Add(responseNotes);
             }
             return trashedResponseNotes;
+        }
+        /// <summary>
+        /// ability to restore a trashed note which is existing in trashed folder
+        /// and rewriting isTrash to false so that is removed from trashed folder and restored back.
+        /// </summary>
+        /// <param name="notesId">id of note which is trashed</param>
+        /// <param name="userEmail">userEmail to validate</param>
+        /// <returns>boolean value</returns>
+        public bool RestoreNote(int notesId, string userEmail)
+        {
+            Note existingNote = GetNoteById(notesId);
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash ==  true)
+            {
+                existingNote.isTrash = false;
+                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            }
+            int row = context.SaveChanges();
+            return row == 1;
         }
 
 

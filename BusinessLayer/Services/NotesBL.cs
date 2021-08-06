@@ -106,6 +106,18 @@ namespace BusinessLayer.Services
             }
             return null;
         }
+        /// <summary>
+        /// validating notes Id and userEmail before restoring a note
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool RestoreTrash(int notesId, string userEmail)
+        {
+            if (notesId > 0 && userEmail != null)
+                return notesRL.RestoreNote(notesId, userEmail);
+            return false;
+        }
 
     }
 }

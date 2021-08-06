@@ -88,7 +88,7 @@ namespace Fundoo.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Success = false, Message = ex.Message });
+                return BadRequest(new { Success = false, ex.Message });
             }
         }
         /// <summary>
@@ -116,7 +116,7 @@ namespace Fundoo.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Success = false, Message = ex.Message });
+                return BadRequest(new { Success = false, ex.Message });
             }
         }
         /// <summary>
@@ -141,7 +141,35 @@ namespace Fundoo.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Success = false, Message = ex.Message });
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+        /// <summary>
+        /// api to restore a note which is trashed
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <returns></returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        [Route("restoreNote/{notesId}")]
+        public ActionResult RestoreANote([FromRoute] int notesId)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    bool isRestored = notesBL.RestoreTrash(notesId, userEmail);
+                    if (isRestored)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been Restored!!" });
+                    }
+                }
+                return NotFound(new { Success = false, Message = "Note Not Found" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
             }
         }
 
