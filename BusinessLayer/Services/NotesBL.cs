@@ -187,12 +187,31 @@ namespace BusinessLayer.Services
                 return notesRL.UnPinNote(notesId, userEmail);
             return false;
         }
-
+        /// <summary>
+        /// ability to permanently delete a note from database
+        /// </summary>
+        /// <param name="notesId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         public bool DeleteNote(int notesId, string userEmail)
         {
             if (notesId > 0 && userEmail != null)
                 return notesRL.DeleteNote(notesId, userEmail);
             return false;
+        }
+        /// <summary>
+        /// ability to update a note
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public UpdateNotes UpdateNote(UpdateNotes data, string userEmail)
+        {
+            if(data!=null && userEmail != null)
+            {
+                return notesRL.UpdateNote(data, userEmail);
+            }
+            return null;
         }
 
     }

@@ -336,6 +336,28 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPut("Update")]
+        public ActionResult UpdateANote([FromBody] UpdateNotes data)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    UpdateNotes isUpdated = notesBL.UpdateNote(data, userEmail);
+                    if (isUpdated!=null)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been Updated!!", data = isUpdated });
+                    }
+                }
+                return NotFound(new { Success = false, Message = "Note Not Found" });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
 
 
     }

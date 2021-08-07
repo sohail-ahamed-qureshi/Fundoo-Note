@@ -236,6 +236,24 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1;
         }
+        /// <summary>
+        /// ability to update a note
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public UpdateNotes UpdateNote(UpdateNotes data, string userEmail)
+        {
+            Note existingNote = GetNoteById(data.NoteId);
+            if(existingNote !=null && existingNote.Email == userEmail && existingNote.isTrash == false)
+            {
+                existingNote.Title = data.Title;
+                existingNote.Description = data.description;
+            }
+            int row = context.SaveChanges();
+            return row == 1 ? data : null;
+        }
 
+        
     }
 }

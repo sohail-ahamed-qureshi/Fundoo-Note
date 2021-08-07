@@ -20,5 +20,6 @@ namespace RepositoryLayer.Interfaces
         bool PinNote(int notesId, string userEmail);
         bool UnPinNote(int notesId, string userEmail);
         bool DeleteNote(int notesId, string userEmail);
+        UpdateNotes UpdateNote(UpdateNotes data, string userEmail);
     }
 }
