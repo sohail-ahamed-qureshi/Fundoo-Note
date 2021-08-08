@@ -34,7 +34,7 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public List<ResponseNotes> GetAllNotes(string email)
         {
-            List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false );
+            List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
             List<ResponseNotes> responseNotesList = new List<ResponseNotes>();
             foreach (Note item in allNotes)
             {
@@ -80,13 +80,13 @@ namespace RepositoryLayer.Services
         {
             int isTrashed = 0;
             Note existingNote = GetNoteById(notesId);
-            if (existingNote != null && existingNote.Email == userEmail&& existingNote.isTrash == false)
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false)
             {
                 existingNote.isTrash = true;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
                 isTrashed = 1;
             }
-            else if(existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
+            else if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
             {
                 existingNote.isTrash = false;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
@@ -104,7 +104,7 @@ namespace RepositoryLayer.Services
         /// <returns> list of trashed notes of the user</returns>
         public List<ResponseNotes> GetTrashedNotes(string userEmail)
         {
-            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note => note.Email == userEmail && note.isTrash == true);
+            List<Note> trashedNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == userEmail && note.isTrash == true);
             List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
             foreach (Note item in trashedNotes)
             {
@@ -118,27 +118,10 @@ namespace RepositoryLayer.Services
                 responseNotes.Color = item.Color;
                 responseNotes.Image = item.Image;
                 responseNotes.Reminder = item.Reminder;
+                responseNotes.UserId = item.User.UserId;
                 trashedResponseNotes.Add(responseNotes);
             }
             return trashedResponseNotes;
-        }
-        /// <summary>
-        /// ability to restore a trashed note which is existing in trashed folder
-        /// and rewriting isTrash to false so that is removed from trashed folder and restored back.
-        /// </summary>
-        /// <param name="notesId">id of note which is trashed</param>
-        /// <param name="userEmail">userEmail to validate</param>
-        /// <returns>boolean value</returns>
-        public bool RestoreNote(int notesId, string userEmail)
-        {
-            Note existingNote = GetNoteById(notesId);
-            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
-            {
-                existingNote.isTrash = false;
-                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-            }
-            int row = context.SaveChanges();
-            return row == 1;
         }
         /// <summary>
         /// ability to archieve a note which is not trashed 
@@ -146,16 +129,24 @@ namespace RepositoryLayer.Services
         /// <param name="notesId"></param>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public bool ArchieveNote(int notesId, string userEmail)
+        public int ArchieveNote(int notesId, string userEmail)
         {
+            int isArchieved = 0;
             Note existingNote = GetNoteById(notesId);
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == false)
             {
                 existingNote.isArchieve = true;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                isArchieved = 1;
+            }
+            else if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == true)
+            {
+                existingNote.isArchieve = false;
+                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                isArchieved = 0;
             }
             int row = context.SaveChanges();
-            return row == 1;
+            return row == 1 ? isArchieved : -1; 
         }
         /// <summary>
         /// ability to retreieve all active archieved notes of users and checking they are not trashed
@@ -164,7 +155,7 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public List<ResponseNotes> GetAllArchievedNotes(string userEmail)
         {
-            List<Note> trashedNotes = context.DbNotes.ToList().FindAll(note => note.Email == userEmail && note.isTrash == false && note.isArchieve == true);
+            List<Note> trashedNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == userEmail && note.isTrash == false && note.isArchieve == true);
             List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
             foreach (Note item in trashedNotes)
             {
@@ -178,26 +169,10 @@ namespace RepositoryLayer.Services
                 responseNotes.Color = item.Color;
                 responseNotes.Image = item.Image;
                 responseNotes.Reminder = item.Reminder;
+                responseNotes.UserId = item.User.UserId;
                 trashedResponseNotes.Add(responseNotes);
             }
             return trashedResponseNotes;
-        }
-        /// <summary>
-        /// ability to unarchieve an active archeived notes
-        /// </summary>
-        /// <param name="notesId"></param>
-        /// <param name="userEmail"></param>
-        /// <returns></returns>
-        public bool UnArchieveNote(int notesId, string userEmail)
-        {
-            Note existingNote = GetNoteById(notesId);
-            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == true)
-            {
-                existingNote.isArchieve = false;
-                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-            }
-            int row = context.SaveChanges();
-            return row == 1;
         }
         /// <summary>
         /// ability to pin a note to top
@@ -256,7 +231,7 @@ namespace RepositoryLayer.Services
         public UpdateNotes UpdateNote(UpdateNotes data, string userEmail)
         {
             Note existingNote = GetNoteById(data.NoteId);
-            if(existingNote !=null && existingNote.Email == userEmail && existingNote.isTrash == false)
+            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false)
             {
                 existingNote.Title = data.Title;
                 existingNote.Description = data.description;
@@ -265,6 +240,6 @@ namespace RepositoryLayer.Services
             return row == 1 ? data : null;
         }
 
-        
+
     }
 }

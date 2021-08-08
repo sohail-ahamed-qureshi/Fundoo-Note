@@ -14,11 +14,8 @@ namespace BusinessLayer.Interfaces
 
         Note GetNoteById(int noteId);
         List<ResponseNotes> GetAllTrashedNotes(string userEmail);
-
-        bool RestoreTrash(int notesId, string userEmail);
-        bool ArchieveNote(int notesId, string userEmail);
+        int ArchieveNote(int notesId, string userEmail);
         List<ResponseNotes> GetAllArchievedNotes(string userEmail);
-        bool UnArchieveNote(int notesId, string userEmail);
         bool PinNote(int notesId, string userEmail);
         bool UnPinNote(int notesId, string userEmail);
         bool DeleteNote(int notesId, string userEmail);

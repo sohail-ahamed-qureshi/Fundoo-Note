@@ -137,9 +137,9 @@ namespace Fundoo.Controllers
                 {
                     var trashedNotes = notesBL.GetAllTrashedNotes(userEmail);
                     if (trashedNotes.Count > 0)
-                        return Ok(new { Success = true, Message = "Your trash is Empty" , data= trashedNotes });
+                        return Ok(new { Success = true, Message = $" trash has {trashedNotes.Count} Note(s)" , data= trashedNotes });
                 }
-                return Ok(new { Success = true, Message = "Your trash is Empty" });
+                return Ok(new { Success = true, Message = " trash is Empty" });
             }
             catch (Exception ex)
             {
@@ -161,10 +161,14 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
-                    bool isArchieve = notesBL.ArchieveNote(notesId, userEmail);
-                    if (isArchieve)
+                    int isArchieve = notesBL.ArchieveNote(notesId, userEmail);
+                    if (isArchieve == 1)
                     {
-                        return Ok(new { Success = true, Message = "Note has been Archieved!!" });
+                        return Ok(new { Success = true, Message = "Note has been Archived!!" });
+                    }
+                    if (isArchieve == 0)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been UnArchived!!" });
                     }
                 }
                 return NotFound(new { Success = false, Message = "Note Not Found" });
@@ -190,37 +194,9 @@ namespace Fundoo.Controllers
                 {
                     var archievedNotes = notesBL.GetAllArchievedNotes(userEmail);
                     if (archievedNotes.Count > 0)
-                        return Ok(new { Success = true, Message = "Your trash is Empty", data = archievedNotes });
+                        return Ok(new { Success = true, Message = " trash is Empty", data = archievedNotes });
                 }
-                return Ok(new { Success = true, Message = "Your Archieve is Empty" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Success = false, ex.Message });
-            }
-        }
-        /// <summary>
-        /// api to unarchieve already archieved note of user
-        /// </summary>
-        /// <param name="notesId"></param>
-        /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut]
-        [Route("{notesId}/UnArchive")]
-        public ActionResult UnArchieveANote([FromRoute] int notesId)
-        {
-            try
-            {
-                string userEmail = GetEmailFromToken();
-                if (userEmail != null)
-                {
-                    bool isRestored = notesBL.UnArchieveNote(notesId, userEmail);
-                    if (isRestored)
-                    {
-                        return Ok(new { Success = true, Message = "Note has been UnArchieved!!" });
-                    }
-                }
-                return NotFound(new { Success = false, Message = "Note Not Found" });
+                return Ok(new { Success = true, Message = " Archive is Empty" });
             }
             catch (Exception ex)
             {
