@@ -100,7 +100,7 @@ namespace Fundoo.Controllers
             {
                 //send email to user for reset password
                 userBL.SendMessageQueue(existingUser);
-                //Task.Delay(5000);
+                Task.Delay(5000);
                 return Ok(new { Success = true, Message = $"Password Reset Link has been sent to Registered Email: {existingUser.Email}" });
             }
             return NotFound("Invalid Email");

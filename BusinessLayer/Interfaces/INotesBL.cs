@@ -9,7 +9,7 @@ namespace BusinessLayer.Interfaces
     public interface INotesBL
     {
         Note AddNotes(ResponseNotes responseNotes, User user);
-        List<OutputNotes> GetAllNotes(string userEmail);
+        List<ResponseNotes> GetAllNotes(string userEmail);
         bool IsTrash(int notesId, string userEmail);
 
         Note GetNoteById(int noteId);

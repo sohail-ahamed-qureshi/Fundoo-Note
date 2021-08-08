@@ -1,4 +1,6 @@
 ﻿using CommonLayer;
+using Fundoo.CommonLayer;
+using Microsoft.EntityFrameworkCore;
 using RepositoryLayer.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -30,13 +32,13 @@ namespace RepositoryLayer.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public List<OutputNotes> GetAllNotes(string email)
+        public List<ResponseNotes> GetAllNotes(string email)
         {
-            List<Note> allNotes = context.DbNotes.ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
-            List<OutputNotes> responseNotesList = new List<OutputNotes>();
+            List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false );
+            List<ResponseNotes> responseNotesList = new List<ResponseNotes>();
             foreach (Note item in allNotes)
             {
-                OutputNotes responseNotes = new OutputNotes();
+                ResponseNotes responseNotes = new ResponseNotes();
                 responseNotes.NoteId = item.NoteId;
                 responseNotes.Title = item.Title;
                 responseNotes.Description = item.Description;
@@ -46,11 +48,12 @@ namespace RepositoryLayer.Services
                 responseNotes.Color = item.Color;
                 responseNotes.Image = item.Image;
                 responseNotes.Reminder = item.Reminder;
+                responseNotes.UserId = item.User.UserId;
                 responseNotesList.Add(responseNotes);
             }
             //getting all pinned lists.
             var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);
-            List<OutputNotes> finalResponseList = new List<OutputNotes>();
+            List<ResponseNotes> finalResponseList = new List<ResponseNotes>();
             finalResponseList.AddRange(pinnedList);
             finalResponseList = finalResponseList.Concat(responseNotesList.Where(notes => notes.isPin == false)).ToList();
             return finalResponseList;

@@ -49,11 +49,11 @@ namespace BusinessLayer.Services
         /// </summary>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public List<OutputNotes> GetAllNotes(string userEmail)
+        public List<ResponseNotes> GetAllNotes(string userEmail)
         {
             if (userEmail != null)
             {
-                List<OutputNotes> allNotes = notesRL.GetAllNotes(userEmail);
+                List<ResponseNotes> allNotes = notesRL.GetAllNotes(userEmail);
                 return allNotes;
             }
             return null;

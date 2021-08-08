@@ -79,10 +79,10 @@ namespace Fundoo.Controllers
             try
             {
                 string userEmail = GetEmailFromToken();
-                List<OutputNotes> allNotes = notesBL.GetAllNotes(userEmail);
+                List<ResponseNotes> allNotes = notesBL.GetAllNotes(userEmail);
                 if (allNotes.Count > 0)
-                    return Ok(allNotes);
-                return Ok(new { Message = "You dont have any Notes." });
+                    return Ok(new { Success = true, Message = $"You have {allNotes.Count} Notes." , data = allNotes });
+                return Ok(new { Success = true, Message = "You dont have any Notes." });
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace Fundoo.Controllers
         /// <param name="notesId"></param>
         /// <returns></returns>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut]
+        [HttpDelete]
         [Route("{notesId}/trash")]
         public ActionResult TrashANote([FromRoute] int notesId)
         {
@@ -133,9 +133,9 @@ namespace Fundoo.Controllers
                 {
                     var trashedNotes = notesBL.GetAllTrashedNotes(userEmail);
                     if (trashedNotes.Count > 0)
-                        return Ok(trashedNotes);
+                        return Ok(new { Success = true, Message = "Your trash is Empty" , data= trashedNotes });
                 }
-                return Ok(new { Message = "Your trash is Empty" });
+                return Ok(new { Success = true, Message = "Your trash is Empty" });
             }
             catch (Exception ex)
             {
@@ -214,9 +214,9 @@ namespace Fundoo.Controllers
                 {
                     var archievedNotes = notesBL.GetAllArchievedNotes(userEmail);
                     if (archievedNotes.Count > 0)
-                        return Ok(archievedNotes);
+                        return Ok(new { Success = true, Message = "Your trash is Empty", data = archievedNotes });
                 }
-                return Ok(new { Message = "Your Archieve is Empty" });
+                return Ok(new { Success = true, Message = "Your Archieve is Empty" });
             }
             catch (Exception ex)
             {
@@ -337,7 +337,7 @@ namespace Fundoo.Controllers
             }
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut("Update")]
+        [HttpPut]
         public ActionResult UpdateANote([FromBody] UpdateNotes data)
         {
             try
