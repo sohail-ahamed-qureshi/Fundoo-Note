@@ -104,10 +104,14 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
-                    bool isTrashed = notesBL.IsTrash(notesId, userEmail);
-                    if (isTrashed)
+                    int isTrashed = notesBL.IsTrash(notesId, userEmail);
+                    if (isTrashed ==1)
                     {
                         return Ok(new { Success = true, Message = "Note has been Deleted!!" });
+                    }
+                    if(isTrashed == 0)
+                    {
+                        return Ok(new { Success = true, Message = "Note has been Restored!!" });
                     }
                 }
                 return NotFound(new { Success = false, Message = "Note Not Found" });
@@ -136,34 +140,6 @@ namespace Fundoo.Controllers
                         return Ok(new { Success = true, Message = "Your trash is Empty" , data= trashedNotes });
                 }
                 return Ok(new { Success = true, Message = "Your trash is Empty" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Success = false, ex.Message });
-            }
-        }
-        /// <summary>
-        /// api to restore a note which is trashed
-        /// </summary>
-        /// <param name="notesId"></param>
-        /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut]
-        [Route("{notesId}/Restore")]
-        public ActionResult RestoreANote([FromRoute] int notesId)
-        {
-            try
-            {
-                string userEmail = GetEmailFromToken();
-                if (userEmail != null)
-                {
-                    bool isRestored = notesBL.RestoreTrash(notesId, userEmail);
-                    if (isRestored)
-                    {
-                        return Ok(new { Success = true, Message = "Note has been Restored!!" });
-                    }
-                }
-                return NotFound(new { Success = false, Message = "Note Not Found" });
             }
             catch (Exception ex)
             {

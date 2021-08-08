@@ -9,7 +9,7 @@ namespace RepositoryLayer.Interfaces
     {
         Note AddNewNote(Note newNote);
         List<ResponseNotes> GetAllNotes(string email);
-        bool IsTrash(int notesId, string userEmail);
+        int IsTrash(int notesId, string userEmail);
 
         Note GetNoteById(int noteId);
         List<ResponseNotes> GetTrashedNotes(string userEmail);

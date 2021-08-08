@@ -79,11 +79,11 @@ namespace BusinessLayer.Services
         /// <param name="notesId"></param>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public bool IsTrash(int notesId, string userEmail)
+        public int IsTrash(int notesId, string userEmail)
         {
             if (notesId > 0 && userEmail != null)
                 return notesRL.IsTrash(notesId, userEmail);
-            return false;
+            return -1;
         }
         /// <summary>
         /// ability to validate userEmail before getting all the trashed notes

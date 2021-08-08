@@ -76,16 +76,24 @@ namespace RepositoryLayer.Services
         /// <param name="notesId"></param>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public bool IsTrash(int notesId, string userEmail)
+        public int IsTrash(int notesId, string userEmail)
         {
+            int isTrashed = 0;
             Note existingNote = GetNoteById(notesId);
-            if (existingNote != null && existingNote.Email == userEmail)
+            if (existingNote != null && existingNote.Email == userEmail&& existingNote.isTrash == false)
             {
                 existingNote.isTrash = true;
                 existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                isTrashed = 1;
+            }
+            else if(existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
+            {
+                existingNote.isTrash = false;
+                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                isTrashed = 0;
             }
             int row = context.SaveChanges();
-            return row == 1;
+            return row == 1 ? isTrashed : -1;
         }
         /// <summary>
         /// ability to get all trashed notes of the user

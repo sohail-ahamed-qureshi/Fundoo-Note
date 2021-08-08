@@ -10,7 +10,7 @@ namespace BusinessLayer.Interfaces
     {
         Note AddNotes(ResponseNotes responseNotes, User user);
         List<ResponseNotes> GetAllNotes(string userEmail);
-        bool IsTrash(int notesId, string userEmail);
+        int IsTrash(int notesId, string userEmail);
 
         Note GetNoteById(int noteId);
         List<ResponseNotes> GetAllTrashedNotes(string userEmail);
