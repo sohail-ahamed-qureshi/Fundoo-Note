@@ -78,7 +78,7 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public int IsTrash(int notesId, string userEmail)
         {
-            int isTrashed = 0;
+            int isTrashed = 0, notFound = -1;
             Note existingNote = GetNoteById(notesId);
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false)
             {
@@ -93,7 +93,7 @@ namespace RepositoryLayer.Services
                 isTrashed = 0;
             }
             int row = context.SaveChanges();
-            return row == 1 ? isTrashed : -1;
+            return row == 1 ? isTrashed : notFound;
         }
         /// <summary>
         /// ability to get all trashed notes of the user
@@ -131,7 +131,7 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public int ArchieveNote(int notesId, string userEmail)
         {
-            int isArchieved = 0;
+            int isArchieved = 0, notFound = -1;
             Note existingNote = GetNoteById(notesId);
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == false)
             {
@@ -146,7 +146,7 @@ namespace RepositoryLayer.Services
                 isArchieved = 0;
             }
             int row = context.SaveChanges();
-            return row == 1 ? isArchieved : -1; 
+            return row == 1 ? isArchieved : notFound; 
         }
         /// <summary>
         /// ability to retreieve all active archieved notes of users and checking they are not trashed
@@ -180,31 +180,22 @@ namespace RepositoryLayer.Services
         /// <param name="notesId"></param>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public bool PinNote(int notesId, string userEmail)
+        public int PinNote(int notesId, string userEmail)
         {
+            int isPinned = 0, notFound=-1;
             Note existingNote = GetNoteById(notesId);
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == false)
             {
                 existingNote.isPin = true;
+                isPinned = 1;
             }
-            int row = context.SaveChanges();
-            return row == 1;
-        }
-        /// <summary>
-        /// ability to unPin a note to top
-        /// </summary>
-        /// <param name="notesId"></param>
-        /// <param name="userEmail"></param>
-        /// <returns></returns>
-        public bool UnPinNote(int notesId, string userEmail)
-        {
-            Note existingNote = GetNoteById(notesId);
-            if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == true)
+            else if(existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == true)
             {
                 existingNote.isPin = false;
+                isPinned = 0;
             }
             int row = context.SaveChanges();
-            return row == 1;
+            return row == 1 ? isPinned : notFound;
         }
         /// <summary>
         /// ability to hard Delete a note from table
@@ -239,7 +230,5 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1 ? data : null;
         }
-
-
     }
 }

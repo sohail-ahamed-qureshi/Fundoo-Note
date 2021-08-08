@@ -194,7 +194,7 @@ namespace Fundoo.Controllers
                 {
                     var archievedNotes = notesBL.GetAllArchievedNotes(userEmail);
                     if (archievedNotes.Count > 0)
-                        return Ok(new { Success = true, Message = " trash is Empty", data = archievedNotes });
+                        return Ok(new { Success = true, Message = $" Archive has {archievedNotes.Count} Note(s)", data = archievedNotes });
                 }
                 return Ok(new { Success = true, Message = " Archive is Empty" });
             }
@@ -218,36 +218,12 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
-                    bool isPinned = notesBL.PinNote(notesId, userEmail);
-                    if (isPinned)
+                    int isPinned = notesBL.PinNote(notesId, userEmail);
+                    if (isPinned == 1)
                     {
                         return Ok(new { Success = true, Message = "Note has been Pinned!!" });
                     }
-                }
-                return NotFound(new { Success = false, Message = "Note Not Found" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Success = false, ex.Message });
-            }
-        }
-        /// <summary>
-        /// api to pin a note to top
-        /// </summary>
-        /// <param name="notesId"></param>
-        /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut]
-        [Route("{notesId}/UnPin")]
-        public ActionResult UnPinANote([FromRoute] int notesId)
-        {
-            try
-            {
-                string userEmail = GetEmailFromToken();
-                if (userEmail != null)
-                {
-                    bool isPinned = notesBL.UnPinNote(notesId, userEmail);
-                    if (isPinned)
+                    if (isPinned == 0)
                     {
                         return Ok(new { Success = true, Message = "Note has been UnPinned!!" });
                     }
@@ -259,7 +235,6 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
-
         /// <summary>
         /// api to Delete a note.
         /// </summary>
