@@ -30,10 +30,9 @@ namespace BusinessLayer.Services
                 newNote.Email = existingUser.Email;
                 newNote.Title = responseNotes.Title;
                 newNote.Description = responseNotes.Description;
-                newNote.Reminder = responseNotes.Reminder;
+                newNote.Reminder = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
                 newNote.CreatedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
                 newNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-                newNote.Reminder = "no";
                 newNote.Color = "white";
                 newNote.Image = "NA";
                 newNote.User = existingUser;

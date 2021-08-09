@@ -18,7 +18,9 @@ namespace CommonLayer
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
-        public string Reminder { get; set; }
+        [Column("Reminder",TypeName ="datetime2")]
+        [DefaultValue(null)]
+        public DateTime? Reminder { get; set; }
         [DefaultValue(false)]
         public bool isArchieve { get; set; }
         [DefaultValue(false)]
@@ -37,7 +39,7 @@ namespace CommonLayer
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
-        public string Reminder { get; set; }
+        public DateTime? Reminder { get; set; }
         public bool isArchieve { get; set; }
         public bool isTrash { get; set; }
         public bool isPin { get; set; }
