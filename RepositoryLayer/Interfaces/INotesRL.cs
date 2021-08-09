@@ -18,5 +18,6 @@ namespace RepositoryLayer.Interfaces
         int PinNote(int notesId, string userEmail);
         bool DeleteNote(int notesId, string userEmail);
         UpdateNotes UpdateNote(UpdateNotes data, string userEmail);
+        List<ResponseNotes> ReminderNotes(string userEmail);
     }
 }

@@ -177,5 +177,15 @@ namespace BusinessLayer.Services
             return null;
         }
 
+        public List<ResponseNotes> ReminderNotes(string userEmail)
+        {
+            if (userEmail != null)
+            {
+                var reminderNotes = notesRL.ReminderNotes(userEmail);
+                return reminderNotes;
+            }
+            return null;
+        }
+
     }
 }

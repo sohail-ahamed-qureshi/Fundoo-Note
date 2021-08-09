@@ -274,5 +274,26 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
+        [HttpGet("Reminders")]
+        public ActionResult GetAllReminderNotes()
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail != null)
+                {
+                    var reminderList = notesBL.ReminderNotes(userEmail);
+                    if (reminderList.Count > 0)
+                    {
+                        return Ok(new { Success = true, Message = $"You have {reminderList.Count} reminders", data = reminderList });
+                    }
+                }
+                return Ok(new { Success = true, Message = "Reminder list is Empty" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
     }
 }

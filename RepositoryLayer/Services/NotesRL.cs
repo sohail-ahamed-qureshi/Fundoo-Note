@@ -35,22 +35,7 @@ namespace RepositoryLayer.Services
         public List<ResponseNotes> GetAllNotes(string email)
         {
             List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
-            List<ResponseNotes> responseNotesList = new List<ResponseNotes>();
-            foreach (Note item in allNotes)
-            {
-                ResponseNotes responseNotes = new ResponseNotes();
-                responseNotes.NoteId = item.NoteId;
-                responseNotes.Title = item.Title;
-                responseNotes.Description = item.Description;
-                responseNotes.isArchieve = item.isArchieve;
-                responseNotes.isPin = item.isPin;
-                responseNotes.isTrash = item.isTrash;
-                responseNotes.Color = item.Color;
-                responseNotes.Image = item.Image;
-                responseNotes.Reminder = item.Reminder;
-                responseNotes.UserId = item.User.UserId;
-                responseNotesList.Add(responseNotes);
-            }
+            List<ResponseNotes> responseNotesList = UtilityNotes(allNotes);
             //getting all pinned lists.
             var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);
             List<ResponseNotes> finalResponseList = new List<ResponseNotes>();
@@ -105,22 +90,7 @@ namespace RepositoryLayer.Services
         public List<ResponseNotes> GetTrashedNotes(string userEmail)
         {
             List<Note> trashedNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == userEmail && note.isTrash == true);
-            List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
-            foreach (Note item in trashedNotes)
-            {
-                ResponseNotes responseNotes = new ResponseNotes();
-                responseNotes.NoteId = item.NoteId;
-                responseNotes.Title = item.Title;
-                responseNotes.Description = item.Description;
-                responseNotes.isArchieve = item.isArchieve;
-                responseNotes.isPin = item.isPin;
-                responseNotes.isTrash = item.isTrash;
-                responseNotes.Color = item.Color;
-                responseNotes.Image = item.Image;
-                responseNotes.Reminder = item.Reminder;
-                responseNotes.UserId = item.User.UserId;
-                trashedResponseNotes.Add(responseNotes);
-            }
+            List<ResponseNotes> trashedResponseNotes = UtilityNotes(trashedNotes);
             return trashedResponseNotes;
         }
         /// <summary>
@@ -155,24 +125,9 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public List<ResponseNotes> GetAllArchievedNotes(string userEmail)
         {
-            List<Note> trashedNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == userEmail && note.isTrash == false && note.isArchieve == true);
-            List<ResponseNotes> trashedResponseNotes = new List<ResponseNotes>();
-            foreach (Note item in trashedNotes)
-            {
-                ResponseNotes responseNotes = new ResponseNotes();
-                responseNotes.NoteId = item.NoteId;
-                responseNotes.Title = item.Title;
-                responseNotes.Description = item.Description;
-                responseNotes.isArchieve = item.isArchieve;
-                responseNotes.isPin = item.isPin;
-                responseNotes.isTrash = item.isTrash;
-                responseNotes.Color = item.Color;
-                responseNotes.Image = item.Image;
-                responseNotes.Reminder = item.Reminder;
-                responseNotes.UserId = item.User.UserId;
-                trashedResponseNotes.Add(responseNotes);
-            }
-            return trashedResponseNotes;
+            List<Note> archivedNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == userEmail && note.isTrash == false && note.isArchieve == true);
+            List<ResponseNotes> archivedResponseNotes = UtilityNotes(archivedNotes);
+            return archivedResponseNotes;
         }
         /// <summary>
         /// ability to pin a note to top
@@ -229,6 +184,42 @@ namespace RepositoryLayer.Services
             }
             int row = context.SaveChanges();
             return row == 1 ? data : null;
+        }
+        /// <summary>
+        /// ability to display Reminders notes
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public List<ResponseNotes> ReminderNotes(string userEmail)
+        {
+            List<Note> reminderNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == userEmail && note.isTrash == false && note.Reminder != null);
+            List<ResponseNotes> responseReminderNotes = UtilityNotes(reminderNotes);
+            return responseReminderNotes;
+        }
+        /// <summary>
+        /// utility method to return response list displaying only fields that are required for user.
+        /// </summary>
+        /// <param name="utilityNotesList"></param>
+        /// <returns></returns>
+        private List<ResponseNotes> UtilityNotes(List<Note> utilityNotesList)
+        {
+            List<ResponseNotes> ResponseNotes = new List<ResponseNotes>();
+            foreach (Note item in utilityNotesList)
+            {
+                ResponseNotes responseNotes = new ResponseNotes();
+                responseNotes.NoteId = item.NoteId;
+                responseNotes.Title = item.Title;
+                responseNotes.Description = item.Description;
+                responseNotes.isArchieve = item.isArchieve;
+                responseNotes.isPin = item.isPin;
+                responseNotes.isTrash = item.isTrash;
+                responseNotes.Color = item.Color;
+                responseNotes.Image = item.Image;
+                responseNotes.Reminder = item.Reminder;
+                responseNotes.UserId = item.User.UserId;
+                ResponseNotes.Add(responseNotes);
+            }
+            return ResponseNotes;
         }
     }
 }
