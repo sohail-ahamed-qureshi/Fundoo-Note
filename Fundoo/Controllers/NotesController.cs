@@ -5,10 +5,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
+using RepositoryLayer.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Fundoo.Controllers
@@ -20,10 +25,15 @@ namespace Fundoo.Controllers
     {
         private IUserBL userBL;
         private INotesBL notesBL;
-        public NotesController(INotesBL notesBL, IUserBL userBL)
+        private readonly IDistributedCache distributedCache;
+        private UserContext context;
+ 
+        public NotesController(INotesBL notesBL, IUserBL userBL, IDistributedCache distributedCache, UserContext context)
         {
             this.notesBL = notesBL;
             this.userBL = userBL;
+            this.distributedCache = distributedCache;
+            this.context = context;
         }
         /// <summary>
         /// controller to add notes from body of s
@@ -65,6 +75,35 @@ namespace Fundoo.Controllers
             //getting user details from token
             return User.FindFirst(user => user.Type == ClaimTypes.Email).Value;
         }
+
+        [HttpGet("RedisList")]
+        public async Task<IActionResult> GetAllNotesUsingRedisCache()
+        {
+            var cacheKey = "NotesList";
+            string serializedNotesList;
+            var notesList = new List<ResponseNotes>();
+            var redisNotesList = await distributedCache.GetAsync(cacheKey);
+            if(redisNotesList != null)
+            {
+                serializedNotesList = Encoding.UTF8.GetString(redisNotesList);
+                notesList = JsonConvert.DeserializeObject<List<ResponseNotes>>(serializedNotesList);
+            }
+            else
+            {
+                string userEmail = GetEmailFromToken();
+                notesList = notesBL.GetAllNotes(userEmail);
+                //notesList = await context.DbNotes.ToListAsync();
+                serializedNotesList = JsonConvert.SerializeObject(notesList);
+                redisNotesList = Encoding.UTF8.GetBytes(serializedNotesList);
+                var options = new DistributedCacheEntryOptions()
+                    .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+                await distributedCache.SetAsync(cacheKey, redisNotesList, options);
+            }
+            return Ok(notesList);
+        }
+
+
         /// <summary>
         /// Api to get all notes of user
         /// </summary>

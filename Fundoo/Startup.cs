@@ -30,6 +30,11 @@ namespace Fundoo
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            //configure the redis stack exchange to support caching
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "localhost:6379";
+            });
 
             var authenticationSettings = Configuration.GetSection("Settings");
             services.Configure<AuthenticationSettings>(authenticationSettings);
