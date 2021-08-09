@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Fundoo.Controllers
 {
-
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class NotesController : ControllerBase
@@ -30,7 +30,6 @@ namespace Fundoo.Controllers
         /// </summary>
         /// <param name="responseNotes"></param>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public ActionResult AddNote([FromBody] ResponseNotes responseNotes)
         {
@@ -64,15 +63,12 @@ namespace Fundoo.Controllers
         private string GetEmailFromToken()
         {
             //getting user details from token
-            ClaimsPrincipal principal = HttpContext.User as ClaimsPrincipal;
-            string userEmail = principal.Claims.FirstOrDefault(user => user.Type == ClaimTypes.Email).Value;
-            return userEmail;
+            return User.FindFirst(user => user.Type == ClaimTypes.Email).Value;
         }
         /// <summary>
         /// Api to get all notes of user
         /// </summary>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         public ActionResult GetAllNotes()
         {
@@ -81,7 +77,7 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 List<ResponseNotes> allNotes = notesBL.GetAllNotes(userEmail);
                 if (allNotes.Count > 0)
-                    return Ok(new { Success = true, Message = $"You have {allNotes.Count} Notes." , data = allNotes });
+                    return Ok(new { Success = true, Message = $"You have {allNotes.Count} Notes.", data = allNotes });
                 return Ok(new { Success = true, Message = "You dont have any Notes." });
             }
             catch (Exception ex)
@@ -94,7 +90,6 @@ namespace Fundoo.Controllers
         /// </summary>
         /// <param name="notesId"></param>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpDelete]
         [Route("{notesId}/trash")]
         public ActionResult TrashANote([FromRoute] int notesId)
@@ -105,11 +100,11 @@ namespace Fundoo.Controllers
                 if (userEmail != null)
                 {
                     int isTrashed = notesBL.IsTrash(notesId, userEmail);
-                    if (isTrashed ==1)
+                    if (isTrashed == 1)
                     {
                         return Ok(new { Success = true, Message = "Note has been Deleted!!" });
                     }
-                    if(isTrashed == 0)
+                    if (isTrashed == 0)
                     {
                         return Ok(new { Success = true, Message = "Note has been Restored!!" });
                     }
@@ -125,7 +120,6 @@ namespace Fundoo.Controllers
         /// api to view all the trashed notes present in trash folder.
         /// </summary>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         [Route("trash")]
         public ActionResult GetAllTrashedNotes()
@@ -137,7 +131,7 @@ namespace Fundoo.Controllers
                 {
                     var trashedNotes = notesBL.GetAllTrashedNotes(userEmail);
                     if (trashedNotes.Count > 0)
-                        return Ok(new { Success = true, Message = $" trash has {trashedNotes.Count} Note(s)" , data= trashedNotes });
+                        return Ok(new { Success = true, Message = $" trash has {trashedNotes.Count} Note(s)", data = trashedNotes });
                 }
                 return Ok(new { Success = true, Message = " trash is Empty" });
             }
@@ -151,7 +145,6 @@ namespace Fundoo.Controllers
         /// </summary>
         /// <param name="notesId"></param>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
         [Route("{notesId}/Archive")]
         public ActionResult ArchieveNote([FromRoute] int notesId)
@@ -182,7 +175,6 @@ namespace Fundoo.Controllers
         /// api to view all notes present in archieve folder
         /// </summary>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         [Route("Archive")]
         public ActionResult GetAllArchievedNotes()
@@ -208,7 +200,6 @@ namespace Fundoo.Controllers
         /// </summary>
         /// <param name="notesId"></param>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
         [Route("{notesId}/Pin")]
         public ActionResult PinANote([FromRoute] int notesId)
@@ -240,7 +231,6 @@ namespace Fundoo.Controllers
         /// </summary>
         /// <param name="notesId"></param>
         /// <returns></returns>
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpDelete]
         [Route("{notesId}")]
         public ActionResult DeleteANote([FromRoute] int notesId)
@@ -263,7 +253,6 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut]
         public ActionResult UpdateANote([FromBody] UpdateNotes data)
         {
@@ -273,19 +262,17 @@ namespace Fundoo.Controllers
                 if (userEmail != null)
                 {
                     UpdateNotes isUpdated = notesBL.UpdateNote(data, userEmail);
-                    if (isUpdated!=null)
+                    if (isUpdated != null)
                     {
                         return Ok(new { Success = true, Message = "Note has been Updated!!", data = isUpdated });
                     }
                 }
                 return NotFound(new { Success = false, Message = "Note Not Found" });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
-
-
     }
 }
