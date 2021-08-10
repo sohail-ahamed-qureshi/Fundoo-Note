@@ -25,15 +25,19 @@ namespace Fundoo.Controllers
     {
         private IUserBL userBL;
         private INotesBL notesBL;
+        //distributed cache class
         private readonly IDistributedCache distributedCache;
-        private UserContext context;
- 
-        public NotesController(INotesBL notesBL, IUserBL userBL, IDistributedCache distributedCache, UserContext context)
+        //cache key
+        string cacheKey;
+        //cache notelist
+        List<ResponseNotes> notesList;
+        public NotesController(INotesBL notesBL, IUserBL userBL, IDistributedCache distributedCache)
         {
             this.notesBL = notesBL;
             this.userBL = userBL;
             this.distributedCache = distributedCache;
-            this.context = context;
+            cacheKey = "NotesList";
+            notesList = new List<ResponseNotes>();
         }
         /// <summary>
         /// controller to add notes from body of s
@@ -75,35 +79,42 @@ namespace Fundoo.Controllers
             //getting user details from token
             return User.FindFirst(user => user.Type == ClaimTypes.Email).Value;
         }
-
+        /// <summary>
+        /// api to retrieve all notes - implementing cache memory
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("RedisList")]
         public async Task<IActionResult> GetAllNotesUsingRedisCache()
         {
-            var cacheKey = "NotesList";
-            string serializedNotesList;
-            var notesList = new List<ResponseNotes>();
-            var redisNotesList = await distributedCache.GetAsync(cacheKey);
-            if(redisNotesList != null)
-            {
-                serializedNotesList = Encoding.UTF8.GetString(redisNotesList);
-                notesList = JsonConvert.DeserializeObject<List<ResponseNotes>>(serializedNotesList);
-            }
-            else
+            try
             {
                 string userEmail = GetEmailFromToken();
-                notesList = notesBL.GetAllNotes(userEmail);
-                //notesList = await context.DbNotes.ToListAsync();
-                serializedNotesList = JsonConvert.SerializeObject(notesList);
-                redisNotesList = Encoding.UTF8.GetBytes(serializedNotesList);
-                var options = new DistributedCacheEntryOptions()
-                    .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(2));
-                await distributedCache.SetAsync(cacheKey, redisNotesList, options);
+                string serializedNotesList;
+                var redisNotesList = await distributedCache.GetAsync(cacheKey);
+                if (redisNotesList == null)
+                {
+                    notesList = notesBL.GetAllNotes(userEmail);
+                    serializedNotesList = JsonConvert.SerializeObject(notesList);
+                    redisNotesList = Encoding.UTF8.GetBytes(serializedNotesList);
+                    var options = new DistributedCacheEntryOptions()
+                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(10))
+                        .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+                    await distributedCache.SetAsync(cacheKey, redisNotesList, options);
+                }
+                else
+                {
+                    serializedNotesList = Encoding.UTF8.GetString(redisNotesList);
+                    notesList = JsonConvert.DeserializeObject<List<ResponseNotes>>(serializedNotesList);
+                }
+                if (notesList.Count == 0)
+                    return Ok(new { Success = true, Message = $"You have {notesList.Count} Notes." });
+                return Ok(new { Success = true, Message = $"You have {notesList.Count} Notes.", data = notesList });
             }
-            return Ok(notesList);
-        }
-
-
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+                                }
         /// <summary>
         /// Api to get all notes of user
         /// </summary>
@@ -139,6 +150,7 @@ namespace Fundoo.Controllers
                 if (userEmail != null)
                 {
                     int isTrashed = notesBL.IsTrash(notesId, userEmail);
+                    distributedCache.Remove(cacheKey);
                     if (isTrashed == 1)
                     {
                         return Ok(new { Success = true, Message = "Note has been Deleted!!" });
@@ -147,6 +159,7 @@ namespace Fundoo.Controllers
                     {
                         return Ok(new { Success = true, Message = "Note has been Restored!!" });
                     }
+
                 }
                 return NotFound(new { Success = false, Message = "Note Not Found" });
             }
@@ -194,6 +207,7 @@ namespace Fundoo.Controllers
                 if (userEmail != null)
                 {
                     int isArchieve = notesBL.ArchieveNote(notesId, userEmail);
+                    distributedCache.Remove(cacheKey);
                     if (isArchieve == 1)
                     {
                         return Ok(new { Success = true, Message = "Note has been Archived!!" });
@@ -249,6 +263,7 @@ namespace Fundoo.Controllers
                 if (userEmail != null)
                 {
                     int isPinned = notesBL.PinNote(notesId, userEmail);
+                    distributedCache.Remove(cacheKey);
                     if (isPinned == 1)
                     {
                         return Ok(new { Success = true, Message = "Note has been Pinned!!" });
@@ -303,6 +318,7 @@ namespace Fundoo.Controllers
                     UpdateNotes isUpdated = notesBL.UpdateNote(data, userEmail);
                     if (isUpdated != null)
                     {
+                        distributedCache.Remove(cacheKey);
                         return Ok(new { Success = true, Message = "Note has been Updated!!", data = isUpdated });
                     }
                 }

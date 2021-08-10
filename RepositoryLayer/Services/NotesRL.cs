@@ -15,7 +15,7 @@ namespace RepositoryLayer.Services
         public NotesRL(UserContext context)
         {
             this.context = context;
-        }
+        }   
         /// <summary>
         /// ability to add new note to table.
         /// </summary>
