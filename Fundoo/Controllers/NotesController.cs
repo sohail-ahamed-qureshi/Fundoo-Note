@@ -385,7 +385,7 @@ namespace Fundoo.Controllers
         /// </summary>
         /// <param name="labelId"></param>
         /// <returns></returns>
-        [HttpDelete("Label/{labelId}")]
+        [HttpDelete("{labelId}/Label")]
         public ActionResult DeleteLabel([FromRoute]int labelId)
         {
             try
@@ -398,6 +398,29 @@ namespace Fundoo.Controllers
                     return Ok(new { Success = true, Message = $" Label was Deleted"});
                 }
                 return NotFound(new { Success = false, Message = $"Invalid LabelId" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+        /// <summary>
+        /// ability to add a label tag to a particular note
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        [HttpPost("TagLabel")]
+        public ActionResult TagALabel(TagRequest tag)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                bool result = notesBL.TagANote(tag.NoteId, tag.LabelId, userEmail);
+                if (result)
+                {
+                    return Ok(new { Success = true, Message = $" Label was Added" });
+                }
+                return Ok(new { Success = true, Message = $" Invalid Data" });
             }
             catch (Exception ex)
             {

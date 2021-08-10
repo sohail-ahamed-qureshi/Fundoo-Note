@@ -25,5 +25,7 @@ namespace RepositoryLayer.Interfaces
         bool CreateLabel(Label label);
         List<LabelResponse> GetAllLabels(string UserEmail);
         bool DeleteLabel(int labelId, User existingUser);
+
+        bool TagANote(int noteId, int labelId, string userEmail);
     }
 }

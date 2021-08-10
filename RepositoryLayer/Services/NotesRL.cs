@@ -35,6 +35,7 @@ namespace RepositoryLayer.Services
         public List<ResponseNotes> GetAllNotes(string email)
         {
             List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
+            
             List<ResponseNotes> responseNotesList = UtilityNotes(allNotes);
             //getting all pinned lists.
             var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);
@@ -272,5 +273,28 @@ namespace RepositoryLayer.Services
         {
             return context.labelTable.FirstOrDefault(label => label.LabelId == labelId && label.Email == email);
         }
+        /// <summary>
+        /// ability to add a label tag to a note
+        /// </summary>
+        /// <param name="noteId"></param>
+        /// <param name="labelId"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public bool TagANote(int noteId, int labelId, string userEmail)
+        {
+            Note note = GetNoteById(noteId);
+            Label label = GetLabelById(labelId, userEmail);
+            if(note!=null && label != null)
+            {
+                JunctionNotesLabel junction = new JunctionNotesLabel();
+                junction.Labels = label;
+                junction.Notes = note;
+                context.JunctionNotesLabels.Add(junction);
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
+
+        
     }
 }

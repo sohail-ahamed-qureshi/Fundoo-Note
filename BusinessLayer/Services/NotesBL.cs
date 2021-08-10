@@ -225,6 +225,15 @@ namespace BusinessLayer.Services
             return false;
         }
 
+        public bool TagANote(int noteId, int labelId, string userEmail)
+        {
+            if(noteId > 0 && labelId > 0 && userEmail != null)
+            {
+               return notesRL.TagANote(noteId, labelId, userEmail);
+            }
+            return false;
+        }
+
 
     }
 }
