@@ -221,5 +221,13 @@ namespace RepositoryLayer.Services
             }
             return ResponseNotes;
         }
+        
+        //Ability to perform crud operations on label
+        public bool CreateLabel(Label label)
+        {
+            context.labelTable.Add(label);
+            int row = context.SaveChanges();
+            return row ==1;
+        }
     }
 }

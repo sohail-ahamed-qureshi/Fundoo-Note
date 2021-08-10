@@ -187,5 +187,13 @@ namespace BusinessLayer.Services
             return null;
         }
 
+        //label crud operations
+        public bool CreateLabel(Label label)
+        {
+            if (label != null)
+                return notesRL.CreateLabel(label);
+            return false;
+        }
+
     }
 }

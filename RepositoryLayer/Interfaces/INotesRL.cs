@@ -19,5 +19,8 @@ namespace RepositoryLayer.Interfaces
         bool DeleteNote(int notesId, string userEmail);
         UpdateNotes UpdateNote(UpdateNotes data, string userEmail);
         List<ResponseNotes> ReminderNotes(string userEmail);
+
+        //label crud operations
+        bool CreateLabel(Label label);
     }
 }

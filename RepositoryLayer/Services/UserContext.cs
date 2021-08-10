@@ -16,5 +16,6 @@ namespace RepositoryLayer.Services
 
         public DbSet<User> FundooUsers { get; set; }
         public DbSet<Note> DbNotes { get; set; }
+        public DbSet<Label> labelTable { get; set; }
     }
 }

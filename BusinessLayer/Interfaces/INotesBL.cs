@@ -21,5 +21,8 @@ namespace BusinessLayer.Interfaces
         UpdateNotes UpdateNote(UpdateNotes data, string userEmail);
 
         List<ResponseNotes> ReminderNotes(string userEmail);
+
+
+        bool CreateLabel(Label label);
     }
 }

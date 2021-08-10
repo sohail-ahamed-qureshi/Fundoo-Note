@@ -88,7 +88,6 @@ namespace Fundoo.Controllers
         {
             try
             {
-                
                 string serializedNotesList;
                 var redisNotesList = await distributedCache.GetAsync(cacheKey);
                 if (redisNotesList == null)
@@ -330,6 +329,24 @@ namespace Fundoo.Controllers
             {
                 return BadRequest(new { Success = false, ex.Message });
             }
+        }
+
+        [HttpPost("Label")]
+        public ActionResult CreateLable([FromBody] Label label)
+        {
+            try
+            {
+                bool isCreated = notesBL.CreateLabel(label);
+                if (isCreated)
+                {
+                    return Ok(new { Success = true, Message = $"{label.LabelName} Label has been created" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+            return BadRequest();
         }
     }
 }
