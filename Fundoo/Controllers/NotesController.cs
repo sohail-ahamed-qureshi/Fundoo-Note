@@ -23,12 +23,12 @@ namespace Fundoo.Controllers
     [ApiController]
     public class NotesController : ControllerBase
     {
-        private IUserBL userBL;
-        private INotesBL notesBL;
+        private readonly IUserBL userBL;
+        private readonly INotesBL notesBL;
         //distributed cache class
         private readonly IDistributedCache distributedCache;
         //cache key
-        string cacheKey;
+        private readonly string cacheKey;
         //cache notelist
         List<ResponseNotes> notesList;
         public NotesController(INotesBL notesBL, IUserBL userBL, IDistributedCache distributedCache)
@@ -36,7 +36,7 @@ namespace Fundoo.Controllers
             this.notesBL = notesBL;
             this.userBL = userBL;
             this.distributedCache = distributedCache;
-            cacheKey = "NotesList";
+            cacheKey = "Notes";
             notesList = new List<ResponseNotes>();
         }
         /// <summary>
@@ -83,16 +83,17 @@ namespace Fundoo.Controllers
         /// api to retrieve all notes - implementing cache memory
         /// </summary>
         /// <returns></returns>
-        [HttpGet("RedisList")]
+        [HttpGet]
         public async Task<IActionResult> GetAllNotesUsingRedisCache()
         {
             try
             {
-                string userEmail = GetEmailFromToken();
+                
                 string serializedNotesList;
                 var redisNotesList = await distributedCache.GetAsync(cacheKey);
                 if (redisNotesList == null)
                 {
+                    string userEmail = GetEmailFromToken();
                     notesList = notesBL.GetAllNotes(userEmail);
                     serializedNotesList = JsonConvert.SerializeObject(notesList);
                     redisNotesList = Encoding.UTF8.GetBytes(serializedNotesList);
@@ -109,26 +110,6 @@ namespace Fundoo.Controllers
                 if (notesList.Count == 0)
                     return Ok(new { Success = true, Message = $"You have {notesList.Count} Notes." });
                 return Ok(new { Success = true, Message = $"You have {notesList.Count} Notes.", data = notesList });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Success = false, ex.Message });
-            }
-                                }
-        /// <summary>
-        /// Api to get all notes of user
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public ActionResult GetAllNotes()
-        {
-            try
-            {
-                string userEmail = GetEmailFromToken();
-                List<ResponseNotes> allNotes = notesBL.GetAllNotes(userEmail);
-                if (allNotes.Count > 0)
-                    return Ok(new { Success = true, Message = $"You have {allNotes.Count} Notes.", data = allNotes });
-                return Ok(new { Success = true, Message = "You dont have any Notes." });
             }
             catch (Exception ex)
             {

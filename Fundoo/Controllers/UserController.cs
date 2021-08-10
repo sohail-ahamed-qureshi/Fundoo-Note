@@ -15,6 +15,7 @@ using Experimental.System.Messaging;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Fundoo.Controllers
 {
@@ -24,9 +25,11 @@ namespace Fundoo.Controllers
     public class UserController : ControllerBase
     {
         private IUserBL userBL;
-        public UserController(IUserBL userBL)
+        private IDistributedCache distributedCache;
+        public UserController(IUserBL userBL, IDistributedCache distributedCache)
         {
             this.userBL = userBL;
+            this.distributedCache = distributedCache;
         }
         [AllowAnonymous]
         [HttpPost]
@@ -65,6 +68,7 @@ namespace Fundoo.Controllers
             var user = userBL.UserLogin(login);
             if (user != null)
             {
+                distributedCache.Remove("Notes");
                 string token = userBL.Authenticate(user.Email, user.UserId);
                 return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}", data = token });
             }
