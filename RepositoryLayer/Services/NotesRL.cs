@@ -229,5 +229,20 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row ==1;
         }
+
+        public List<LabelResponse> GetAllLabels(string userEmail)
+        {
+            var labels = context.labelTable.Include(user=> user.User).ToList().FindAll(label => label.Email == userEmail);
+            List<LabelResponse> labelLists = new List<LabelResponse>(); 
+            foreach (var item in labels)
+            {
+                LabelResponse label = new LabelResponse();
+                label.LabelId = item.LabelId;
+                label.LabelName = item.LabelName;
+                label.UserId = item.User.UserId;
+                labelLists.Add(label);
+            }
+            return labelLists;
+        }
     }
 }

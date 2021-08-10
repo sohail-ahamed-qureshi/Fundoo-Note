@@ -188,11 +188,23 @@ namespace BusinessLayer.Services
         }
 
         //label crud operations
-        public bool CreateLabel(Label label)
+        public bool CreateLabel(LabelRequest label, User existingUser)
         {
-            if (label != null)
-                return notesRL.CreateLabel(label);
+            if (label != null && existingUser != null)
+            {
+                Label newLabel = new Label();
+                newLabel.LabelName = label.LabelName;
+                newLabel.User = existingUser;
+                newLabel.Email = existingUser.Email;
+                return notesRL.CreateLabel(newLabel);
+            }
+                
             return false;
+        }
+
+        public List<LabelResponse> GetAllLabels(string userEmail)
+        {
+            return notesRL.GetAllLabels(userEmail);  
         }
 
     }

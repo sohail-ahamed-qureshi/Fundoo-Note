@@ -332,11 +332,17 @@ namespace Fundoo.Controllers
         }
 
         [HttpPost("Label")]
-        public ActionResult CreateLable([FromBody] Label label)
+        public ActionResult CreateLable([FromBody] LabelRequest label)
         {
             try
             {
-                bool isCreated = notesBL.CreateLabel(label);
+                string userEmail = GetEmailFromToken();
+                if (userEmail == null)
+                {
+                    return BadRequest(new { Message = "Invalid User Email" });
+                }
+                var existingUser = userBL.GetUser(userEmail);
+                bool isCreated = notesBL.CreateLabel(label, existingUser);
                 if (isCreated)
                 {
                     return Ok(new { Success = true, Message = $"{label.LabelName} Label has been created" });
@@ -347,6 +353,25 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
             return BadRequest();
+        }
+
+        [HttpGet("Labels")]
+        public ActionResult GetAllLabel()
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                var labelList = notesBL.GetAllLabels(userEmail);
+                if (labelList.Count > 0)
+                {
+                    return Ok(new { Success = true, Message = $" You have {labelList.Count} labels", Labels = labelList });
+                }
+                return Ok(new { Success = true, Message = $" Labels list is Empty" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
         }
     }
 }

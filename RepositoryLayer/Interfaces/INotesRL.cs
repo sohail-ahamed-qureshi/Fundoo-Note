@@ -22,5 +22,6 @@ namespace RepositoryLayer.Interfaces
 
         //label crud operations
         bool CreateLabel(Label label);
+        List<LabelResponse> GetAllLabels(string UserEmail);
     }
 }

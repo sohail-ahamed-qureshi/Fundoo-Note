@@ -23,6 +23,7 @@ namespace BusinessLayer.Interfaces
         List<ResponseNotes> ReminderNotes(string userEmail);
 
 
-        bool CreateLabel(Label label);
+        bool CreateLabel(LabelRequest label, User existingUser);
+        List<LabelResponse> GetAllLabels(string UserEmail);
     }
 }

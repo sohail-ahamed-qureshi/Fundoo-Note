@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RepositoryLayer.Services;
 
 namespace RepositoryLayer.Migrations
 {
     [DbContext(typeof(UserContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [Migration("20210810081313_Repository.Services.UpdateLabel")]
+    partial class RepositoryServicesUpdateLabel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,19 +28,16 @@ namespace RepositoryLayer.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("LabelName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int?>("NoteId")
                         .HasColumnType("int");
 
                     b.HasKey("LabelId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("NoteId");
 
                     b.ToTable("labelTable");
                 });
@@ -129,11 +128,11 @@ namespace RepositoryLayer.Migrations
 
             modelBuilder.Entity("CommonLayer.Label", b =>
                 {
-                    b.HasOne("Fundoo.CommonLayer.User", "User")
+                    b.HasOne("CommonLayer.Note", "note")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("NoteId");
 
-                    b.Navigation("User");
+                    b.Navigation("note");
                 });
 
             modelBuilder.Entity("CommonLayer.Note", b =>
