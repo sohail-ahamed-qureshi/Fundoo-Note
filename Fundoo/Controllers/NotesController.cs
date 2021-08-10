@@ -161,7 +161,7 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
-                    var trashedNotes = notesBL.GetAllTrashedNotes(userEmail);
+                    List<ResponseNotes> trashedNotes = notesBL.GetAllTrashedNotes(userEmail);
                     if (trashedNotes.Count > 0)
                         return Ok(new { Success = true, Message = $" trash has {trashedNotes.Count} Note(s)", data = trashedNotes });
                 }
@@ -217,7 +217,7 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
-                    var archievedNotes = notesBL.GetAllArchievedNotes(userEmail);
+                    List<ResponseNotes> archievedNotes = notesBL.GetAllArchievedNotes(userEmail);
                     if (archievedNotes.Count > 0)
                         return Ok(new { Success = true, Message = $" Archive has {archievedNotes.Count} Note(s)", data = archievedNotes });
                 }
@@ -317,7 +317,7 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
-                    var reminderList = notesBL.ReminderNotes(userEmail);
+                    List<ResponseNotes> reminderList = notesBL.ReminderNotes(userEmail);
                     if (reminderList.Count > 0)
                     {
                         return Ok(new { Success = true, Message = $"You have {reminderList.Count} reminders", data = reminderList });
@@ -330,7 +330,11 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
-
+        /// <summary>
+        /// api to add new label to user table
+        /// </summary>
+        /// <param name="label"></param>
+        /// <returns></returns>
         [HttpPost("Label")]
         public ActionResult CreateLable([FromBody] LabelRequest label)
         {
@@ -354,7 +358,10 @@ namespace Fundoo.Controllers
             }
             return BadRequest();
         }
-
+        /// <summary>
+        /// ability to get all labels of user
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("Labels")]
         public ActionResult GetAllLabel()
         {
@@ -367,6 +374,30 @@ namespace Fundoo.Controllers
                     return Ok(new { Success = true, Message = $" You have {labelList.Count} labels", Labels = labelList });
                 }
                 return Ok(new { Success = true, Message = $" Labels list is Empty" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+        /// <summary>
+        /// api to delete a label from database of particular user
+        /// </summary>
+        /// <param name="labelId"></param>
+        /// <returns></returns>
+        [HttpDelete("Label/{labelId}")]
+        public ActionResult DeleteLabel([FromRoute]int labelId)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                User existingUser = userBL.GetUser(userEmail);
+                bool result = notesBL.DeleteLabel( labelId, existingUser);
+                if (result)
+                {
+                    return Ok(new { Success = true, Message = $" Label was Deleted"});
+                }
+                return NotFound(new { Success = false, Message = $"Invalid LabelId" });
             }
             catch (Exception ex)
             {

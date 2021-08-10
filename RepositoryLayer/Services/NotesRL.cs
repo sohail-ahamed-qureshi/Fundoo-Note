@@ -15,7 +15,7 @@ namespace RepositoryLayer.Services
         public NotesRL(UserContext context)
         {
             this.context = context;
-        }   
+        }
         /// <summary>
         /// ability to add new note to table.
         /// </summary>
@@ -116,7 +116,7 @@ namespace RepositoryLayer.Services
                 isArchieved = 0;
             }
             int row = context.SaveChanges();
-            return row == 1 ? isArchieved : notFound; 
+            return row == 1 ? isArchieved : notFound;
         }
         /// <summary>
         /// ability to retreieve all active archieved notes of users and checking they are not trashed
@@ -137,14 +137,14 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public int PinNote(int notesId, string userEmail)
         {
-            int isPinned = 0, notFound=-1;
+            int isPinned = 0, notFound = -1;
             Note existingNote = GetNoteById(notesId);
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == false)
             {
                 existingNote.isPin = true;
                 isPinned = 1;
             }
-            else if(existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == true)
+            else if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isPin == true)
             {
                 existingNote.isPin = false;
                 isPinned = 0;
@@ -221,19 +221,23 @@ namespace RepositoryLayer.Services
             }
             return ResponseNotes;
         }
-        
+
         //Ability to perform crud operations on label
-        public bool CreateLabel(Label label)
+        public bool CreateLabel(Label newlabel)
         {
-            context.labelTable.Add(label);
+            Label existinglabel = context.labelTable.FirstOrDefault(label => label.LabelName == newlabel.LabelName);
+            if (existinglabel == null)
+            {
+                context.labelTable.Add(newlabel);
+            }
             int row = context.SaveChanges();
-            return row ==1;
+            return row == 1;
         }
 
         public List<LabelResponse> GetAllLabels(string userEmail)
         {
-            var labels = context.labelTable.Include(user=> user.User).ToList().FindAll(label => label.Email == userEmail);
-            List<LabelResponse> labelLists = new List<LabelResponse>(); 
+            var labels = context.labelTable.Include(user => user.User).ToList().FindAll(label => label.Email == userEmail);
+            List<LabelResponse> labelLists = new List<LabelResponse>();
             foreach (var item in labels)
             {
                 LabelResponse label = new LabelResponse();
@@ -243,6 +247,30 @@ namespace RepositoryLayer.Services
                 labelLists.Add(label);
             }
             return labelLists;
+        }
+        /// <summary>
+        /// ability to delete a label from table
+        /// </summary>
+        /// <param name="labelId"></param>
+        /// <param name="existingUser"></param>
+        /// <returns></returns>
+        public bool DeleteLabel(int labelId, User existingUser)
+        {
+            Label existingLabel = GetLabelById(labelId, existingUser.Email);
+            if (existingLabel != null)
+                context.labelTable.Remove(existingLabel);
+            int row = context.SaveChanges();
+            return row == 1;
+        }
+        /// <summary>
+        /// utility method to get label from database
+        /// </summary>
+        /// <param name="labelId"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        private Label GetLabelById(int labelId, string email)
+        {
+            return context.labelTable.FirstOrDefault(label => label.LabelId == labelId && label.Email == email);
         }
     }
 }

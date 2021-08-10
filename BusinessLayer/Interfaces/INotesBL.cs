@@ -25,5 +25,6 @@ namespace BusinessLayer.Interfaces
 
         bool CreateLabel(LabelRequest label, User existingUser);
         List<LabelResponse> GetAllLabels(string UserEmail);
+        bool DeleteLabel(int labelId, User existingUser);
     }
 }

@@ -201,11 +201,30 @@ namespace BusinessLayer.Services
                 
             return false;
         }
-
+        /// <summary>
+        /// ability to get all labels from table
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         public List<LabelResponse> GetAllLabels(string userEmail)
         {
             return notesRL.GetAllLabels(userEmail);  
         }
+        /// <summary>
+        /// ability to delete a label
+        /// </summary>
+        /// <param name="labelId"></param>
+        /// <param name="existingUser"></param>
+        /// <returns></returns>
+        public bool DeleteLabel(int labelId, User existingUser)
+        {
+            if (labelId > 0 && existingUser != null)
+            {
+               return notesRL.DeleteLabel(labelId, existingUser);
+            }
+            return false;
+        }
+
 
     }
 }

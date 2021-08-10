@@ -1,4 +1,5 @@
 ﻿using CommonLayer;
+using Fundoo.CommonLayer;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,5 +24,6 @@ namespace RepositoryLayer.Interfaces
         //label crud operations
         bool CreateLabel(Label label);
         List<LabelResponse> GetAllLabels(string UserEmail);
+        bool DeleteLabel(int labelId, User existingUser);
     }
 }
