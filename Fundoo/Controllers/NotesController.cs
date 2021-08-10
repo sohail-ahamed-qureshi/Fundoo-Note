@@ -405,7 +405,7 @@ namespace Fundoo.Controllers
             }
         }
         /// <summary>
-        /// ability to add a label tag to a particular note
+        /// ability to add a label tag to a particular note of a user
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
