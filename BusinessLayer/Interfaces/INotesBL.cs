@@ -27,5 +27,7 @@ namespace BusinessLayer.Interfaces
         List<LabelResponse> GetAllLabels(string UserEmail);
         bool DeleteLabel(int labelId, User existingUser);
         bool TagANote(int noteId, int labelId, string userEmail);
+
+        List<TagResponse> GetAllLabeledNotes(int labelId);
     }
 }

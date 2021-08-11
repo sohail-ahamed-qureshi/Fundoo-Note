@@ -170,7 +170,7 @@ namespace BusinessLayer.Services
         /// <returns></returns>
         public UpdateNotes UpdateNote(UpdateNotes data, string userEmail)
         {
-            if(data!=null && userEmail != null)
+            if (data != null && userEmail != null)
             {
                 return notesRL.UpdateNote(data, userEmail);
             }
@@ -198,7 +198,7 @@ namespace BusinessLayer.Services
                 newLabel.Email = existingUser.Email;
                 return notesRL.CreateLabel(newLabel);
             }
-                
+
             return false;
         }
         /// <summary>
@@ -208,7 +208,7 @@ namespace BusinessLayer.Services
         /// <returns></returns>
         public List<LabelResponse> GetAllLabels(string userEmail)
         {
-            return notesRL.GetAllLabels(userEmail);  
+            return notesRL.GetAllLabels(userEmail);
         }
         /// <summary>
         /// ability to delete a label
@@ -220,20 +220,28 @@ namespace BusinessLayer.Services
         {
             if (labelId > 0 && existingUser != null)
             {
-               return notesRL.DeleteLabel(labelId, existingUser);
+                return notesRL.DeleteLabel(labelId, existingUser);
             }
             return false;
         }
 
         public bool TagANote(int noteId, int labelId, string userEmail)
         {
-            if(noteId > 0 && labelId > 0 && userEmail != null)
+            if (noteId > 0 && labelId > 0 && userEmail != null)
             {
-               return notesRL.TagANote(noteId, labelId, userEmail);
+                return notesRL.TagANote(noteId, labelId, userEmail);
             }
             return false;
         }
 
+        public List<TagResponse> GetAllLabeledNotes(int labelId)
+        {
+            if (labelId > 0)
+            {
+               return notesRL.GetAllLabeledNotes(labelId);
+            }
+            return null;
+        }
 
     }
 }

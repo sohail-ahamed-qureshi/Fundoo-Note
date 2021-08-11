@@ -35,7 +35,7 @@ namespace RepositoryLayer.Services
         public List<ResponseNotes> GetAllNotes(string email)
         {
             List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
-            
+
             List<ResponseNotes> responseNotesList = UtilityNotes(allNotes);
             //getting all pinned lists.
             var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);
@@ -284,7 +284,7 @@ namespace RepositoryLayer.Services
         {
             Note note = GetNoteById(noteId);
             Label label = GetLabelById(labelId, userEmail);
-            if(note!=null && label != null)
+            if (note != null && label != null)
             {
                 JunctionNotesLabel junction = new JunctionNotesLabel();
                 junction.Labels = label;
@@ -294,7 +294,27 @@ namespace RepositoryLayer.Services
             int row = context.SaveChanges();
             return row == 1;
         }
+        /// <summary>
+        /// ability to get all note that are labeled by user
+        /// </summary>
+        public List<TagResponse> GetAllLabeledNotes(int labelId)
+        {
+            var labelList = context.JunctionNotesLabels.Include(label => label.Labels).Include(notes => notes.Notes).ToList();
+            var finalLabelList = labelList.FindAll(label => label.Labels.LabelId == labelId);
+            List<TagResponse> tagList = new List<TagResponse>();
+            foreach (var item in finalLabelList)
+            {
+                TagResponse tagResponse = new TagResponse();
+                tagResponse.NoteId = item.Notes.NoteId;
+                tagResponse.Title = item.Notes.Title;
+                tagResponse.Description = item.Notes.Description;
+                tagResponse.LabelId = item.Labels.LabelId;
+                tagResponse.LabelName = item.Labels.LabelName;
+                tagList.Add(tagResponse);
+            }
+            return tagList;
+        }
 
-        
+
     }
 }

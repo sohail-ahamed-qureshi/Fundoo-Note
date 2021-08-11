@@ -19,4 +19,13 @@ namespace CommonLayer
         public int NoteId { get; set; }
         public int LabelId { get; set; }
     }
+
+    public class TagResponse
+    {
+        public int NoteId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public int LabelId { get; set; }
+        public string LabelName { get; set; }
+    }
 }

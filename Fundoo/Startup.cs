@@ -104,6 +104,8 @@ namespace Fundoo
             var emailConfigure = Configuration.GetSection("EmailSettings")
                     .Get<EmailConfiguration>();
             services.AddSingleton(emailConfigure);
+
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RepositoryLayer.Services;
 using System;
@@ -31,12 +32,12 @@ namespace Fundoo.Controllers
         private readonly string cacheKey;
         //cache notelist
         List<ResponseNotes> notesList;
-        public NotesController(INotesBL notesBL, IUserBL userBL, IDistributedCache distributedCache)
+        public NotesController(INotesBL notesBL, IUserBL userBL,IConfiguration configuration , IDistributedCache distributedCache)
         {
             this.notesBL = notesBL;
             this.userBL = userBL;
             this.distributedCache = distributedCache;
-            cacheKey = "Notes";
+            cacheKey = configuration.GetSection("RedisCache").GetSection("CacheKey").Value;
             notesList = new List<ResponseNotes>();
         }
         /// <summary>
@@ -421,6 +422,25 @@ namespace Fundoo.Controllers
                     return Ok(new { Success = true, Message = $" Label was Added" });
                 }
                 return Ok(new { Success = true, Message = $" Invalid Data" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
+        [HttpGet("{labelId}/LabelledNotes")]
+        public ActionResult GetallLabeledNotes([FromRoute]int labelId)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                var labelList = notesBL.GetAllLabeledNotes(labelId);
+                if (labelList.Count > 0)
+                {
+                    return Ok(new { Success = true, Message = $" You have {labelList.Count} labels", Labels = labelList });
+                }
+                return Ok(new { Success = true, Message = $" Labels list is Empty" });
             }
             catch (Exception ex)
             {
