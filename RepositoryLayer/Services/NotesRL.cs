@@ -35,7 +35,7 @@ namespace RepositoryLayer.Services
         public List<ResponseNotes> GetAllNotes(string email)
         {
             List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
-
+            
             List<ResponseNotes> responseNotesList = UtilityNotes(allNotes);
             //getting all pinned lists.
             var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);

@@ -25,6 +25,7 @@ namespace Fundoo
         }
 
         public IConfiguration Configuration { get; }
+        private readonly string policyName = "CorsPolicy";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -105,7 +106,15 @@ namespace Fundoo
                     .Get<EmailConfiguration>();
             services.AddSingleton(emailConfigure);
 
-            
+            //adding cross origin resource sharing configuration
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -119,6 +128,7 @@ namespace Fundoo
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors();
 
             app.UseAuthorization();
 

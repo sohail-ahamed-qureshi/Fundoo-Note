@@ -16,9 +16,11 @@ using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
 using System.Security.Claims;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Cors;
 
 namespace Fundoo.Controllers
 {
+    [EnableCors()]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
