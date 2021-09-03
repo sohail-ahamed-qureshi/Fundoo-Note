@@ -32,7 +32,7 @@ namespace Fundoo.Controllers
         private readonly string cacheKey;
         //cache notelist
         List<ResponseNotes> notesList;
-        public NotesController(INotesBL notesBL, IUserBL userBL,IConfiguration configuration , IDistributedCache distributedCache)
+        public NotesController(INotesBL notesBL, IUserBL userBL, IConfiguration configuration, IDistributedCache distributedCache)
         {
             this.notesBL = notesBL;
             this.userBL = userBL;
@@ -58,9 +58,11 @@ namespace Fundoo.Controllers
                 User existingUser = userBL.GetUser(userEmail);
                 if (responseNotes != null && existingUser != null)
                 {
+                    distributedCache.Remove(cacheKey);
                     Note noteResult = notesBL.AddNotes(responseNotes, existingUser);
                     if (noteResult != null)
                     {
+
                         return Created(noteResult.Email, noteResult);
                     }
                 }
@@ -296,10 +298,11 @@ namespace Fundoo.Controllers
                 string userEmail = GetEmailFromToken();
                 if (userEmail != null)
                 {
+                    distributedCache.Remove(cacheKey);
                     UpdateNotes isUpdated = notesBL.UpdateNote(data, userEmail);
                     if (isUpdated != null)
                     {
-                        distributedCache.Remove(cacheKey);
+
                         return Ok(new { Success = true, Message = "Note has been Updated!!", data = isUpdated });
                     }
                 }
@@ -352,12 +355,15 @@ namespace Fundoo.Controllers
                 {
                     return Ok(new { Success = true, Message = $"{label.LabelName} Label has been created" });
                 }
+                else
+                {
+                    return BadRequest(new { Success = true, Message = $"{label.LabelName} Label Already Exists" });
+                }
             }
             catch (Exception ex)
             {
                 return BadRequest(new { Success = false, ex.Message });
             }
-            return BadRequest();
         }
         /// <summary>
         /// ability to get all labels of user
@@ -381,22 +387,46 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
+
+        [HttpPut("Labels")]
+        public ActionResult UpdateLabel([FromBody] LabelResponse label)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail == null)
+                {
+                    return BadRequest(new { Success = false, Message = "Invalid User" });
+                }
+                LabelResponse updatedLabel = notesBL.UpdateLabel(label, userEmail);
+                if(updatedLabel == null)
+                {
+                    return Ok(new { Success = true, Message = $"label doesn't exists" });
+                }
+                return Ok(new { Success = true, Message = $"{updatedLabel.LabelName} is updated" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
         /// <summary>
         /// api to delete a label from database of particular user
         /// </summary>
         /// <param name="labelId"></param>
         /// <returns></returns>
         [HttpDelete("{labelId}/Label")]
-        public ActionResult DeleteLabel([FromRoute]int labelId)
+        public ActionResult DeleteLabel([FromRoute] int labelId)
         {
             try
             {
                 string userEmail = GetEmailFromToken();
                 User existingUser = userBL.GetUser(userEmail);
-                bool result = notesBL.DeleteLabel( labelId, existingUser);
+                bool result = notesBL.DeleteLabel(labelId, existingUser);
                 if (result)
                 {
-                    return Ok(new { Success = true, Message = $" Label was Deleted"});
+                    return Ok(new { Success = true, Message = $" Label was Deleted" });
                 }
                 return NotFound(new { Success = false, Message = $"Invalid LabelId" });
             }
@@ -430,7 +460,7 @@ namespace Fundoo.Controllers
         }
 
         [HttpGet("{labelId}/LabelledNotes")]
-        public ActionResult GetallLabeledNotes([FromRoute]int labelId)
+        public ActionResult GetallLabeledNotes([FromRoute] int labelId)
         {
             try
             {

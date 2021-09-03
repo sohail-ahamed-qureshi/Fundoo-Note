@@ -49,19 +49,6 @@ namespace Fundoo.Controllers
             }
             return BadRequest("User Already Exists!!");
         }
-        //public ActionResult GetAllUsers()
-        //{
-        //    var users = userBL.GetUsers();
-        //    return Ok(users);
-        //}
-
-        //public ActionResult GetUser(int userid)
-        //{
-        //    var user = userBL.GetUser(userid);
-        //    if (user != null)
-        //        return Ok(user);
-        //    return NotFound($"UserID: {userid} Not Found!!");
-        //}
         [AllowAnonymous]
         [HttpPost]
         [Route("Login")]
@@ -70,32 +57,12 @@ namespace Fundoo.Controllers
             var user = userBL.UserLogin(login);
             if (user != null)
             {
-                distributedCache.Remove("Notes");
+                distributedCache.Remove("NotesList");
                 string token = userBL.Authenticate(user.Email, user.UserId);
                 return Ok(new { Success = true, Message = $"Login Successfull, Welcome {user.FirstName + " " + user.LastName}", data = token });
             }
             return NotFound("Invalid UserName or Password");
         }
-
-        //public ActionResult UpdateUserDetails(User user)
-        //{
-        //    User updatedUser = null;
-        //    if (user != null)
-        //        updatedUser = userBL.UpdateUser(user);
-        //    if (updatedUser != null)
-        //        return Created(updatedUser.Email, updatedUser);
-        //    return NotFound($"Invalid User Details");
-        //}
-
-        //[HttpDelete]
-        //[Route("{userId}")]
-        //public ActionResult DeleteUser(int userId)
-        //{
-        //    bool result = userBL.DeleteUser(userId);
-        //    if (result)
-        //        return Ok(new { Success = true, Message = $"User Id: {userId} Delete SuccessFull " });
-        //    return NotFound($"Invalid Id: {userId}, User Not Found");
-        //}
         [AllowAnonymous]
         [HttpPost]
         [Route("forgotpassword")]
