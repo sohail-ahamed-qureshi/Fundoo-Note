@@ -353,6 +353,7 @@ namespace Fundoo.Controllers
                 bool isCreated = notesBL.CreateLabel(label, existingUser);
                 if (isCreated)
                 {
+                    distributedCache.Remove(cacheKey);
                     return Ok(new { Success = true, Message = $"{label.LabelName} Label has been created" });
                 }
                 else
@@ -374,6 +375,8 @@ namespace Fundoo.Controllers
         {
             try
             {
+
+                distributedCache.Remove(cacheKey);
                 string userEmail = GetEmailFromToken();
                 var labelList = notesBL.GetAllLabels(userEmail);
                 if (labelList.Count > 0)
@@ -399,10 +402,11 @@ namespace Fundoo.Controllers
                     return BadRequest(new { Success = false, Message = "Invalid User" });
                 }
                 LabelResponse updatedLabel = notesBL.UpdateLabel(label, userEmail);
-                if(updatedLabel == null)
+                if (updatedLabel == null)
                 {
                     return Ok(new { Success = true, Message = $"label doesn't exists" });
                 }
+                distributedCache.Remove(cacheKey);
                 return Ok(new { Success = true, Message = $"{updatedLabel.LabelName} is updated" });
             }
             catch (Exception ex)
@@ -423,6 +427,7 @@ namespace Fundoo.Controllers
             {
                 string userEmail = GetEmailFromToken();
                 User existingUser = userBL.GetUser(userEmail);
+                distributedCache.Remove(cacheKey);
                 bool result = notesBL.DeleteLabel(labelId, existingUser);
                 if (result)
                 {
@@ -445,6 +450,7 @@ namespace Fundoo.Controllers
         {
             try
             {
+                distributedCache.Remove(cacheKey);
                 string userEmail = GetEmailFromToken();
                 bool result = notesBL.TagANote(tag.NoteId, tag.LabelId, userEmail);
                 if (result)
@@ -468,6 +474,7 @@ namespace Fundoo.Controllers
                 var labelList = notesBL.GetAllLabeledNotes(labelId);
                 if (labelList.Count > 0)
                 {
+                    distributedCache.Remove(cacheKey);
                     return Ok(new { Success = true, Message = $" You have {labelList.Count} labels", Labels = labelList });
                 }
                 return Ok(new { Success = true, Message = $" Labels list is Empty" });
@@ -477,5 +484,54 @@ namespace Fundoo.Controllers
                 return BadRequest(new { Success = false, ex.Message });
             }
         }
+
+        [HttpDelete("{labelId}/{noteId}/LabelledNotes")]
+        public ActionResult DeleteLabelFromNotes([FromRoute] int labelId, int noteId)
+        {
+            try
+            {
+                distributedCache.Remove(cacheKey);
+                TagRequest data = new TagRequest
+                {
+                    LabelId = labelId,
+                    NoteId = noteId
+                };
+                bool isRemoved = notesBL.DeletelabelfromNote(data);
+                if (isRemoved)
+                {
+                    return Ok(new { Success = true, Message = $"label Removed" });
+                }
+                return Ok(new { Success = true, Message = $"Remove failed" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
+        [HttpPost("Collab")]
+        public ActionResult AddCollab([FromBody] CollabRequest data)
+        {
+            try
+            {
+                string userEmail = GetEmailFromToken();
+                if (userEmail.Equals(data.Email))
+                {
+                    return BadRequest(new { Success = false, Message = $"Invalid User Email" });
+                }
+                bool isCollabAdded = notesBL.AddCollab(data);
+                if (isCollabAdded)
+                {
+                    distributedCache.Remove(cacheKey);
+                    return Ok(new { Success = true, Message = $"Collab Added" });
+                }
+                return BadRequest(new { Success = false, Message = $"Email Already exists" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
     }
 }

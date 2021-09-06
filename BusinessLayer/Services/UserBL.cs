@@ -277,7 +277,7 @@ namespace BusinessLayer.Services
             message.Formatter = new BinaryMessageFormatter();
             string token = message.Body.ToString();
             string userEmail = ExtractData(token);
-            var emailMessage = new Mail(new string[] { userEmail }, "Fundoo Note - Reset Password", $"https://localhost:44333/api/user/resetpassword/{token} ");
+            var emailMessage = new Mail(new string[] { userEmail }, "Fundoo Note - Reset Password", $"http://localhost:4200/resetpassword/{token} ");
             emailSender.SendEmail(emailMessage);
         }
 

@@ -18,5 +18,6 @@ namespace RepositoryLayer.Services
         public DbSet<Note> DbNotes { get; set; }
         public DbSet<Label> labelTable { get; set; }
         public DbSet<JunctionNotesLabel> JunctionNotesLabels { get; set; }
+        public DbSet<JunctionUserCollab> JunctionUserCollabs { get; set; }
     }
 }

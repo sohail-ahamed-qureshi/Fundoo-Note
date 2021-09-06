@@ -30,11 +30,14 @@ namespace BusinessLayer.Services
                 newNote.Email = existingUser.Email;
                 newNote.Title = responseNotes.Title;
                 newNote.Description = responseNotes.Description;
-                newNote.Reminder = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-                newNote.CreatedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-                newNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-                newNote.Color = "white";
-                newNote.Image = "NA";
+                //newNote.Reminder = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                newNote.Reminder = DateTime.Now;
+                newNote.CreatedDate = DateTime.Now;
+                newNote.ModifiedDate =DateTime.Now;
+                newNote.Color = responseNotes.Color;
+                newNote.Image = responseNotes.Image;
+                newNote.isArchieve = responseNotes.isArchieve;
+                newNote.isPin = responseNotes.isPin;
                 newNote.User = existingUser;
                 Note noteResult = notesRL.AddNewNote(newNote);
                 if (noteResult != null)
@@ -225,6 +228,15 @@ namespace BusinessLayer.Services
             return false;
         }
 
+        public LabelResponse UpdateLabel(LabelResponse data, string userEmail)
+        {
+            if (data != null && userEmail != null)
+            {
+                return notesRL.UpdateLabel(data, userEmail);
+            }
+            return null;
+        }
+
         public bool TagANote(int noteId, int labelId, string userEmail)
         {
             if (noteId > 0 && labelId > 0 && userEmail != null)
@@ -241,6 +253,27 @@ namespace BusinessLayer.Services
                return notesRL.GetAllLabeledNotes(labelId);
             }
             return null;
+        }
+
+        public bool DeletelabelfromNote(TagRequest data)
+        {
+            if(data != null)
+            {
+              return notesRL.DeletelabelfromNote(data);
+            }
+            return false;
+        }
+
+
+        //Collab Functionality
+       
+        public bool AddCollab(CollabRequest data)
+        {
+            if(data != null)
+            {
+                return notesRL.AddCollaborator(data);
+            }
+            return false;
         }
 
     }

@@ -12,5 +12,6 @@ namespace CommonLayer
         public string Title { get; set; }
         [Required]
         public string description { get; set; }
+        public string Color { get; set; }
     }
 }

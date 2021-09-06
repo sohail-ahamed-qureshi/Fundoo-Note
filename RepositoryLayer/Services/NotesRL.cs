@@ -12,9 +12,11 @@ namespace RepositoryLayer.Services
     public class NotesRL : INotesRL
     {
         private UserContext context;
-        public NotesRL(UserContext context)
+        private IUserRL userRL;
+        public NotesRL(UserContext context, IUserRL userRL)
         {
             this.context = context;
+            this.userRL = userRL;
         }
         /// <summary>
         /// ability to add new note to table.
@@ -32,18 +34,77 @@ namespace RepositoryLayer.Services
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public List<ResponseNotes> GetAllNotes(string email)
+        public List<ResponseNotes> GetNotes(string email)
         {
+
+            //apply joins for each note, check for labels associated with each note.
             List<Note> allNotes = context.DbNotes.Include(user => user.User).ToList().FindAll(note => note.Email == email && note.isArchieve == false && note.isTrash == false);
-            
+            var result = (from notes in context.DbNotes
+                          join labelledNotes in context.JunctionNotesLabels
+                          on notes.NoteId equals labelledNotes.Notes.NoteId
+                          join labels in context.labelTable
+                          on labelledNotes.Labels.LabelId equals labels.LabelId
+                          select new
+                          {
+                              NoteId = notes.NoteId,
+                              Title = notes.Title,
+                              Description = notes.Description,
+                              Email = notes.Email,
+                              LabelId = labels.LabelId,
+                              LabelName = labels.LabelName
+                          }
+                          ).ToList().FindAll(notes => notes.Email == email);
             List<ResponseNotes> responseNotesList = UtilityNotes(allNotes);
             //getting all pinned lists.
             var pinnedList = responseNotesList.FindAll(notes => notes.isPin == true);
             List<ResponseNotes> finalResponseList = new List<ResponseNotes>();
             finalResponseList.AddRange(pinnedList);
             finalResponseList = finalResponseList.Concat(responseNotesList.Where(notes => notes.isPin == false)).ToList();
+            //var notesList = GetNotes(email);
             return finalResponseList;
         }
+
+
+        public List<ResponseNotes> GetAllNotes(string email)
+        {
+            List<ResponseNotes> allNotes = context.DbNotes.Where(note => note.Email == email && note.isArchieve == false && note.isTrash == false).
+                 Select(notes => new ResponseNotes
+                 {
+                     NoteId = notes.NoteId,
+                     Title = notes.Title,
+                     Description = notes.Description,
+                     Color = notes.Color,
+                     Image = notes.Image,
+                     isArchieve = notes.isArchieve,
+                     isPin = notes.isPin,
+                     isTrash = notes.isTrash,
+                     CreatedDate = notes.CreatedDate,
+                     ModifiedDate = notes.ModifiedDate,
+                     Reminder = notes.Reminder
+                 }).ToList();
+            foreach (var note in allNotes)
+            {
+                List<LabelResponse> labelList = context.JunctionNotesLabels.
+                    Where(notes => notes.Notes.NoteId == note.NoteId).
+                    Join(context.labelTable,
+                    notesLabel => notesLabel.Labels.LabelId,
+                    label => label.LabelId, (notesLabel, label) => new LabelResponse
+                    {
+                        LabelId = notesLabel.Labels.LabelId,
+                        LabelName = label.LabelName
+                    }).ToList();
+                note.Labels = labelList;
+            }
+
+            if (allNotes.Count == 0)
+            {
+                return null;
+            }
+            return allNotes;
+
+        }
+
+
         /// <summary>
         /// utility to retrieve note using note id
         /// </summary>
@@ -69,13 +130,13 @@ namespace RepositoryLayer.Services
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false)
             {
                 existingNote.isTrash = true;
-                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                existingNote.ModifiedDate = DateTime.Now;
                 isTrashed = 1;
             }
             else if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == true)
             {
                 existingNote.isTrash = false;
-                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                existingNote.ModifiedDate = DateTime.Now;
                 isTrashed = 0;
             }
             int row = context.SaveChanges();
@@ -107,13 +168,13 @@ namespace RepositoryLayer.Services
             if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == false)
             {
                 existingNote.isArchieve = true;
-                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                existingNote.ModifiedDate = DateTime.Now;
                 isArchieved = 1;
             }
             else if (existingNote != null && existingNote.Email == userEmail && existingNote.isTrash == false && existingNote.isArchieve == true)
             {
                 existingNote.isArchieve = false;
-                existingNote.ModifiedDate = DateTime.Parse(DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+                existingNote.ModifiedDate = DateTime.Now;
                 isArchieved = 0;
             }
             int row = context.SaveChanges();
@@ -182,6 +243,8 @@ namespace RepositoryLayer.Services
             {
                 existingNote.Title = data.Title;
                 existingNote.Description = data.description;
+                existingNote.Color = data.Color;
+                existingNote.ModifiedDate = DateTime.Now;
             }
             int row = context.SaveChanges();
             return row == 1 ? data : null;
@@ -218,6 +281,8 @@ namespace RepositoryLayer.Services
                 responseNotes.Image = item.Image;
                 responseNotes.Reminder = item.Reminder;
                 responseNotes.UserId = item.User.UserId;
+                responseNotes.ModifiedDate = item.ModifiedDate;
+                responseNotes.CreatedDate = item.CreatedDate;
                 ResponseNotes.Add(responseNotes);
             }
             return ResponseNotes;
@@ -226,7 +291,7 @@ namespace RepositoryLayer.Services
         //Ability to perform crud operations on label
         public bool CreateLabel(Label newlabel)
         {
-            Label existinglabel = context.labelTable.FirstOrDefault(label => label.LabelName == newlabel.LabelName);
+            Label existinglabel = context.labelTable.FirstOrDefault(label => label.LabelName == newlabel.LabelName && label.Email == newlabel.Email);
             if (existinglabel == null)
             {
                 context.labelTable.Add(newlabel);
@@ -249,6 +314,24 @@ namespace RepositoryLayer.Services
             }
             return labelLists;
         }
+
+        /// <summary>
+        /// ability to update label of user
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public LabelResponse UpdateLabel(LabelResponse data, string userEmail)
+        {
+            Label existingLabel = GetLabelById(data.LabelId, userEmail);
+            if (existingLabel != null && existingLabel.Email == userEmail)
+            {
+                existingLabel.LabelName = data.LabelName;
+            }
+            int row = context.SaveChanges();
+            return row == 1 ? data : null;
+        }
+
         /// <summary>
         /// ability to delete a label from table
         /// </summary>
@@ -282,10 +365,17 @@ namespace RepositoryLayer.Services
         /// <returns></returns>
         public bool TagANote(int noteId, int labelId, string userEmail)
         {
+            //first check whether the note and label are already present in the junction table.
+            //if not present, check whether label is already existing in labels table,
+            //and also check for notes whether notes is already existing in notes table,
+            //if not present add them to particular table 
+            //and finally add them to junctions table.
             Note note = GetNoteById(noteId);
             Label label = GetLabelById(labelId, userEmail);
-            if (note != null && label != null)
+            var existingLabelledNote = context.JunctionNotesLabels.FirstOrDefault(labelledNote => labelledNote.Labels == label && labelledNote.Notes == note);
+            if (existingLabelledNote == null)
             {
+                //note is not labelled 
                 JunctionNotesLabel junction = new JunctionNotesLabel();
                 junction.Labels = label;
                 junction.Notes = note;
@@ -315,6 +405,40 @@ namespace RepositoryLayer.Services
             return tagList;
         }
 
+        public bool DeletelabelfromNote(TagRequest data)
+        {
 
+            context.JunctionNotesLabels.Remove(
+                context.JunctionNotesLabels.FirstOrDefault(notesLabel => notesLabel.Notes.NoteId == data.NoteId && notesLabel.Labels.LabelId == data.LabelId));
+            int row = context.SaveChanges();
+            return row == 1;
+        }
+
+        // Collab CRUD part
+
+
+        public bool AddCollaborator(CollabRequest data)
+        {
+            User existingUser = userRL.GetUser(data.Email);
+            Note existingNote = GetNoteById(data.NoteId);
+            if (existingUser == null || existingNote == null)
+            {
+                return false;
+            }
+
+            var existingCollab = context.JunctionUserCollabs.FirstOrDefault(collab => collab.User.UserId == existingUser.UserId && collab.Notes.NoteId == existingNote.NoteId);
+            if (existingCollab == null)
+            {
+                JunctionUserCollab collab = new JunctionUserCollab
+                {
+                    Notes = existingNote,
+                    User = existingUser,
+                    Email = existingUser.Email
+                };
+                context.JunctionUserCollabs.Add(collab);
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
     }
 }
