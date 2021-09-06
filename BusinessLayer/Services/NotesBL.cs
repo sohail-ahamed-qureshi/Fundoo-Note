@@ -267,13 +267,18 @@ namespace BusinessLayer.Services
 
         //Collab Functionality
        
-        public bool AddCollab(CollabRequest data)
+        public bool AddCollab(CollabRequest data, int userId)
         {
             if(data != null)
             {
-                return notesRL.AddCollaborator(data);
+                return notesRL.AddCollaborator(data, userId);
             }
             return false;
+        }
+
+        public List<CollabResponse> GetAllCollabs(int UserId)
+        {
+            return notesRL.GetAllCollabs(UserId);
         }
 
     }

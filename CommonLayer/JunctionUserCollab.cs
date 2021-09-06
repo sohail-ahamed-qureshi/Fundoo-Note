@@ -14,6 +14,7 @@ namespace CommonLayer
         public int CollabId { get; set; }
         public Note Notes { get; set; }
         public User User { get; set; }
+        public int OwnerId { get; set; }
         public string Email { get; set; }
     }
 
@@ -23,7 +24,15 @@ namespace CommonLayer
         public string Email { get; set; }
     }
 
+    public class CollabResponse
+    {
+        public Note Notes { get; set; }
+        public int UserId { get; set; }
+        public string Email { get; set; }
+    }
 
-   
+
+
+
 
    }

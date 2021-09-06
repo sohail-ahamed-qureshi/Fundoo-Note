@@ -82,6 +82,12 @@ namespace Fundoo.Controllers
             //getting user details from token
             return User.FindFirst(user => user.Type == ClaimTypes.Email).Value;
         }
+
+
+        private int GetUserIDFromToken()
+        {
+            return Convert.ToInt32(User.FindFirst(user => user.Type == "userId").Value);
+        }
         /// <summary>
         /// api to retrieve all notes - implementing cache memory
         /// </summary>
@@ -130,6 +136,7 @@ namespace Fundoo.Controllers
             try
             {
                 string userEmail = GetEmailFromToken();
+                
                 if (userEmail != null)
                 {
                     int isTrashed = notesBL.IsTrash(notesId, userEmail);
@@ -515,17 +522,38 @@ namespace Fundoo.Controllers
             try
             {
                 string userEmail = GetEmailFromToken();
+                int UserId = GetUserIDFromToken();
                 if (userEmail.Equals(data.Email))
                 {
                     return BadRequest(new { Success = false, Message = $"Invalid User Email" });
                 }
-                bool isCollabAdded = notesBL.AddCollab(data);
+                bool isCollabAdded = notesBL.AddCollab(data, UserId);
                 if (isCollabAdded)
                 {
                     distributedCache.Remove(cacheKey);
                     return Ok(new { Success = true, Message = $"Collab Added" });
                 }
                 return BadRequest(new { Success = false, Message = $"Email Already exists" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
+        [HttpGet("Collabs")]
+        public ActionResult GetAllCollabs()
+        {
+            try
+            {
+                int UserId = GetUserIDFromToken();
+                var CollabList = notesBL.GetAllCollabs(UserId);
+                if (CollabList.Count > 0)
+                {
+                    distributedCache.Remove(cacheKey);
+                    return Ok(new { Success = true, Message = $" You have {CollabList.Count} collabs", Collabs = CollabList });
+                }
+                return Ok(new { Success = true, Message = $" Collab list is Empty" });
             }
             catch (Exception ex)
             {

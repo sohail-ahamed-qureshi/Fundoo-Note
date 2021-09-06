@@ -417,7 +417,7 @@ namespace RepositoryLayer.Services
         // Collab CRUD part
 
 
-        public bool AddCollaborator(CollabRequest data)
+        public bool AddCollaborator(CollabRequest data, int userId)
         {
             User existingUser = userRL.GetUser(data.Email);
             Note existingNote = GetNoteById(data.NoteId);
@@ -433,12 +433,26 @@ namespace RepositoryLayer.Services
                 {
                     Notes = existingNote,
                     User = existingUser,
-                    Email = existingUser.Email
+                    Email = existingUser.Email,
+                    OwnerId = userId
                 };
                 context.JunctionUserCollabs.Add(collab);
             }
             int row = context.SaveChanges();
             return row == 1;
+        }
+
+
+        public List<CollabResponse> GetAllCollabs(int UserId)
+        {
+            List<CollabResponse> allCollabs = context.JunctionUserCollabs.Where(collab => collab.OwnerId == UserId).
+                Select(collabs => new CollabResponse
+                {
+                    Notes = collabs.Notes,
+                    UserId = collabs.User.UserId,
+                    Email = collabs.Email
+                }).ToList();
+            return allCollabs;
         }
     }
 }

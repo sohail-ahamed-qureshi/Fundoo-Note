@@ -33,6 +33,7 @@ namespace BusinessLayer.Interfaces
          bool DeletelabelfromNote(TagRequest data);
 
         //Collab Crud
-        bool AddCollab(CollabRequest data);
+        bool AddCollab(CollabRequest data, int UserId);
+        List<CollabResponse> GetAllCollabs(int UserId);
     }
 }
