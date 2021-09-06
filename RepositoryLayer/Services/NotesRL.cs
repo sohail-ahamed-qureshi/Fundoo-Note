@@ -454,5 +454,22 @@ namespace RepositoryLayer.Services
                 }).ToList();
             return allCollabs;
         }
+
+        public bool RemoveCollab(CollabRequest data, int userId)
+        {
+            User existingUser = userRL.GetUser(data.Email);
+            if (existingUser == null)
+            {
+                return false;
+            }
+            var existingCollab = context.JunctionUserCollabs.FirstOrDefault(
+                collab => collab.User.UserId == existingUser.UserId && collab.Notes.NoteId == data.NoteId && collab.OwnerId == userId);
+            if (existingCollab != null)
+            {
+                context.JunctionUserCollabs.Remove(existingCollab);
+            }
+            int row = context.SaveChanges();
+            return row == 1;
+        }
     }
 }

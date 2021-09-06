@@ -561,5 +561,31 @@ namespace Fundoo.Controllers
             }
         }
 
+
+        [HttpDelete("{noteId}/{email}/Collab")]
+        public ActionResult RemoveCollab([FromRoute] int noteId, [FromRoute] string email)
+        {
+            try
+            {
+                int UserId = GetUserIDFromToken();
+                CollabRequest data = new CollabRequest
+                {
+                    NoteId = noteId,
+                    Email = email
+                };
+                bool isCollabRemoved = notesBL.RemoveCollab(data, UserId);
+                if (isCollabRemoved)
+                {
+                    distributedCache.Remove(cacheKey);
+                    return Ok(new { Success = true, Message = $"Collab Removed" });
+                }
+                return BadRequest(new { Success = false, Message = $"Remove Failed" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, ex.Message });
+            }
+        }
+
     }
 }

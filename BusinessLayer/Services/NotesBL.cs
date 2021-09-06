@@ -281,5 +281,14 @@ namespace BusinessLayer.Services
             return notesRL.GetAllCollabs(UserId);
         }
 
+        public bool RemoveCollab(CollabRequest data, int userId)
+        {
+            if (data != null)
+            {
+                return notesRL.RemoveCollab(data, userId);
+            }
+            return false;
+        }
+
     }
 }

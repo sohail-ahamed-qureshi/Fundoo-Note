@@ -32,5 +32,7 @@ namespace RepositoryLayer.Interfaces
         bool DeletelabelfromNote(TagRequest data);
         bool AddCollaborator(CollabRequest data, int UserId);
         List<CollabResponse> GetAllCollabs(int UserId);
+
+        bool RemoveCollab(CollabRequest data, int userId);
     }
 }

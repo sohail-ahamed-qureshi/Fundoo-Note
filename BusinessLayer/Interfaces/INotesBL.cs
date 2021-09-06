@@ -35,5 +35,7 @@ namespace BusinessLayer.Interfaces
         //Collab Crud
         bool AddCollab(CollabRequest data, int UserId);
         List<CollabResponse> GetAllCollabs(int UserId);
+
+        bool RemoveCollab(CollabRequest data, int userId);
     }
 }
