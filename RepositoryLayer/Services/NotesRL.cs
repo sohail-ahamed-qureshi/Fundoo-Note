@@ -65,8 +65,26 @@ namespace RepositoryLayer.Services
         }
 
 
-        public List<ResponseNotes> GetAllNotes(string email)
+        public List<ResponseNotes> GetAllNotes(string email, int userId)
         {
+            List<ResponseNotes> collabNotes = context.JunctionUserCollabs.
+                Where(note => note.User.UserId == userId).
+                Join(context.DbNotes,
+                collab => collab.Notes.NoteId,
+                note => note.NoteId,
+                (collab, note) => new ResponseNotes
+                {
+                    NoteId = collab.Notes.NoteId,
+                    Title = note.Title,
+                    Description = note.Description,
+                    Color = note.Color,
+                    Image = note.Image,
+                    isPin = note.isPin,
+                    isArchieve = note.isArchieve,
+                    isTrash = note.isTrash,
+                    Reminder = note.Reminder
+                }).ToList();
+
             List<ResponseNotes> allNotes = context.DbNotes.Where(note => note.Email == email && note.isArchieve == false && note.isTrash == false).
                  Select(notes => new ResponseNotes
                  {
@@ -82,7 +100,8 @@ namespace RepositoryLayer.Services
                      ModifiedDate = notes.ModifiedDate,
                      Reminder = notes.Reminder
                  }).ToList();
-            foreach (var note in allNotes)
+            collabNotes.AddRange(allNotes);
+            foreach (var note in collabNotes)
             {
                 List<LabelResponse> labelList = context.JunctionNotesLabels.
                     Where(notes => notes.Notes.NoteId == note.NoteId).
@@ -96,11 +115,11 @@ namespace RepositoryLayer.Services
                 note.Labels = labelList;
             }
 
-            if (allNotes.Count == 0)
+            if (collabNotes.Count == 0)
             {
                 return null;
             }
-            return allNotes;
+            return collabNotes;
 
         }
 

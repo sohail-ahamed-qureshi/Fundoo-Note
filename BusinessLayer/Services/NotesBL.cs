@@ -51,11 +51,11 @@ namespace BusinessLayer.Services
         /// </summary>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public List<ResponseNotes> GetAllNotes(string userEmail)
+        public List<ResponseNotes> GetAllNotes(string userEmail, int userId)
         {
             if (userEmail != null)
             {
-                List<ResponseNotes> allNotes = notesRL.GetAllNotes(userEmail);
+                List<ResponseNotes> allNotes = notesRL.GetAllNotes(userEmail, userId);
                 return allNotes;
             }
             return null;

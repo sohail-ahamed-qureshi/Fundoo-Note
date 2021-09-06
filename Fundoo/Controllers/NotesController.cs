@@ -102,7 +102,8 @@ namespace Fundoo.Controllers
                 if (redisNotesList == null)
                 {
                     string userEmail = GetEmailFromToken();
-                    notesList = notesBL.GetAllNotes(userEmail);
+                    int userId = GetUserIDFromToken();
+                    notesList = notesBL.GetAllNotes(userEmail, userId);
                     serializedNotesList = JsonConvert.SerializeObject(notesList);
                     redisNotesList = Encoding.UTF8.GetBytes(serializedNotesList);
                     var options = new DistributedCacheEntryOptions()
